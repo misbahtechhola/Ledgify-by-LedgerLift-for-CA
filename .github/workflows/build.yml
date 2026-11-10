@@ -5,6 +5,7 @@ on:
   workflow_dispatch:
 permissions:
   contents: write
+  issues: write
 jobs:
   build-mac:
     runs-on: macos-latest
@@ -18,14 +19,22 @@ jobs:
       - name: Install
         run: npm ci
       - name: Build DMG
-        run: npm run build:mac-universal
+        id: build
+        run: npm run build:mac-universal 2>&1 | tee /tmp/build-mac.log; exit ${PIPESTATUS[0]}
         env:
           CSC_IDENTITY_AUTO_DISCOVERY: false
           DEBUG: electron-builder
-      - name: List dist
-        if: always()
-        run: ls -la dist/ 2>/dev/null || echo "No dist folder"
+      - name: Report error if failed
+        if: failure() && steps.build.outcome == 'failure'
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          LOG=$(tail -50 /tmp/build-mac.log 2>/dev/null || echo "No log")
+          gh issue create --title "Mac build error (run ${{ github.run_number }})" \
+            --body "$(echo "$LOG")" \
+            --repo "${{ github.repository }}" || true
       - name: Upload
+        if: success()
         uses: actions/upload-artifact@v4
         with:
           name: Ledgify-macOS-DMG
@@ -43,15 +52,21 @@ jobs:
       - name: Install
         run: npm ci
       - name: Build EXE
-        run: npm run build:win
+        id: build
+        run: npm run build:win 2>&1 | Tee-Object -FilePath C:\build-win.log; if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
         env:
           CSC_IDENTITY_AUTO_DISCOVERY: false
           DEBUG: electron-builder
-      - name: List dist
-        if: always()
-        shell: cmd
-        run: dir dist\ 2>nul || echo No dist folder
+      - name: Report error if failed
+        if: failure() && steps.build.outcome == 'failure'
+        shell: pwsh
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          $log = Get-Content C:\build-win.log -Tail 50 -ErrorAction SilentlyContinue | Out-String
+          gh issue create --title "Win build error (run ${{ github.run_number }})" --body "$log" --repo "${{ github.repository }}"
       - name: Upload
+        if: success()
         uses: actions/upload-artifact@v4
         with:
           name: Ledgify-Windows-EXE
