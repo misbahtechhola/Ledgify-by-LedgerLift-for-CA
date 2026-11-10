@@ -162,6 +162,12 @@ h3{font-size:15px;font-weight:600;color:var(--text);margin-bottom:12px}
 .search-wrap{position:relative}
 .search-wrap input{padding-left:34px}
 .search-wrap .search-icon{position:absolute;left:10px;top:50%;transform:translateY(-50%);color:var(--text3);pointer-events:none;font-size:14px}
+
+/* ---- User switcher bar ---- */
+#userswitcher{position:fixed;bottom:16px;right:16px;z-index:9999}
+#userswitcher button{display:flex;align-items:center;gap:8px;background:#0f1730;color:#fff;border:none;border-radius:24px;padding:10px 18px;font-size:13px;font-weight:600;cursor:pointer;box-shadow:0 4px 16px rgba(0,0,0,.35);transition:.15s}
+#userswitcher button:hover{background:#1a2c5b;transform:translateY(-1px)}
+#userswitcher button .uic{width:26px;height:26px;border-radius:50%;background:#3b82f6;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:#fff}
 </style>
 </head>
 <body>
@@ -1510,5 +1516,12 @@ document.addEventListener('DOMContentLoaded',()=>{
   },100);
 });
 </script>
+
+<div id="userswitcher">
+  <button onclick="window.electronAPI ? window.electronAPI.switchApp('cadesk') : (location.href='cadesk.html')" title="Switch to CA Desk – Practice Management">
+    <div class="uic">CA</div>
+    Switch to CA Desk (Accountant mode)
+  </button>
+</div>
 </body>
 </html>

@@ -15,6 +15,7 @@ const storeDelete = (key) => store ? store.delete(key) : delete memStore[key];
 const storeGetAll = () => store ? store.store : memStore;
 
 let mainWindow;
+let currentApp = 'ledgify'; // 'ledgify' or 'cadesk'
 const isDev = process.argv.includes('--dev');
 
 function createWindow() {
@@ -87,6 +88,22 @@ app.whenReady().then(() => {
 });
 
 app.on('window-all-closed', () => { if (process.platform !== 'darwin') app.quit(); });
+
+// ─── IPC: App Switcher ───────────────────────────────────────────────────────
+ipcMain.on('switch-app', (event, appName) => {
+  if (!mainWindow) return;
+  if (appName === 'cadesk') {
+    currentApp = 'cadesk';
+    mainWindow.loadFile(path.join(__dirname, 'src', 'cadesk.html'));
+    mainWindow.setTitle('CA Desk – Practice Management for CAs');
+  } else {
+    currentApp = 'ledgify';
+    mainWindow.loadFile(path.join(__dirname, 'src', 'index.html'));
+    mainWindow.setTitle('Ledgify – SME Accounting');
+  }
+});
+
+ipcMain.handle('get-version', () => app.getVersion());
 
 // ─── IPC: Data store ─────────────────────────────────────────────────────────
 ipcMain.handle('store:get', (_, key) => storeGet(key));

@@ -25,3 +25,9 @@ contextBridge.exposeInMainWorld('L', {
   // Listen for menu actions (New Invoice, Backup, etc.)
   onMenuAction: (cb) => ipcRenderer.on('menu-action', (_, action) => cb(action))
 });
+
+// Also expose electronAPI for the app switcher (used by both Ledgify and CA Desk)
+contextBridge.exposeInMainWorld('electronAPI', {
+  switchApp: (appName) => ipcRenderer.send('switch-app', appName),
+  getVersion: () => ipcRenderer.invoke('get-version')
+});

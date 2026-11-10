@@ -1,7 +1,7 @@
 {
   "name": "ledgify",
-  "version": "1.0.0",
-  "description": "Ledgify by LedgerLift — Smart Books. Happy Business.",
+  "version": "1.0.19",
+  "description": "LedgerLift Suite — Ledgify (SME accounting) + CA Desk (practice management for CAs) in one app",
   "main": "main.js",
   "author": "LedgerLift",
   "license": "MIT",
@@ -24,7 +24,7 @@
   },
   "build": {
     "appId": "com.ledgerlift.ledgify",
-    "productName": "Ledgify",
+    "productName": "LedgerLift Suite",
     "copyright": "Copyright © 2026 LedgerLift",
     "publish": null,
     "directories": {
@@ -66,7 +66,7 @@
       "createStartMenuShortcut": true
     },
     "dmg": {
-      "title": "Install Ledgify",
+      "title": "Install LedgerLift Suite",
       "writeUpdateInfo": false
     },
     "icon": "src/assets/icon.png"
