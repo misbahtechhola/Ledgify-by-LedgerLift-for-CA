@@ -1,82 +1,68 @@
 name: Build Ledgify Installers
-
 on:
   push:
     branches: [main]
   workflow_dispatch:
-
 permissions:
   contents: write
-  actions: read
-
 jobs:
   build-mac:
     runs-on: macos-latest
     steps:
-      - uses: actions/checkout@v4
-
-      - uses: actions/setup-node@v4
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup Node
+        uses: actions/setup-node@v4
         with:
           node-version: '20'
-          cache: 'npm'
-
-      - run: npm ci
-
-      - name: Build macOS DMG
+      - name: Install
+        run: npm ci
+      - name: Build DMG
         run: npm run build:mac-universal
         env:
           CSC_IDENTITY_AUTO_DISCOVERY: false
-
-      - uses: actions/upload-artifact@v4
+      - name: Upload
+        uses: actions/upload-artifact@v4
         with:
           name: Ledgify-macOS-DMG
           path: dist/*.dmg
           retention-days: 30
-
   build-windows:
     runs-on: windows-latest
     steps:
-      - uses: actions/checkout@v4
-
-      - uses: actions/setup-node@v4
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup Node
+        uses: actions/setup-node@v4
         with:
           node-version: '20'
-          cache: 'npm'
-
-      - run: npm ci
-
-      - name: Build Windows EXE
+      - name: Install
+        run: npm ci
+      - name: Build EXE
         run: npm run build:win
         env:
           CSC_IDENTITY_AUTO_DISCOVERY: false
-
-      - uses: actions/upload-artifact@v4
+      - name: Upload
+        uses: actions/upload-artifact@v4
         with:
           name: Ledgify-Windows-EXE
           path: dist/*.exe
           retention-days: 30
-
   release:
     needs: [build-mac, build-windows]
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/download-artifact@v4
+      - name: Download Mac
+        uses: actions/download-artifact@v4
         with:
           name: Ledgify-macOS-DMG
           path: ./release
-
-      - uses: actions/download-artifact@v4
+      - name: Download Win
+        uses: actions/download-artifact@v4
         with:
           name: Ledgify-Windows-EXE
           path: ./release
-
-      - name: Publish Release
+      - name: Create Release
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          TAG="v1.0.${{ github.run_number }}"
-          NOTES="Ledgify by LedgerLift. Free offline accounting for Indian SME traders. macOS dmg + Windows exe. 100% offline, GST-ready, 13 Indian languages."
-          gh release create "$TAG" ./release/* \
-            --repo "${{ github.repository }}" \
-            --title "Ledgify $TAG" \
-            --notes "$NOTES"
+        run: gh release create v1.0.${{ github.run_number }} ./release/* --repo "${{ github.repository }}" --title "Ledgify v1.0.${{ github.run_number }}" --notes "Free offline accounting for Indian SME traders."
