@@ -3,10 +3,13 @@ name: Build Ledgify Installers
 on:
   push:
     branches: [main]
-  workflow_dispatch:   # lets you trigger manually from GitHub website
+  workflow_dispatch:
+
+permissions:
+  contents: write
 
 jobs:
-  # ── macOS universal .dmg (Intel + Apple Silicon in one file) ──────────────
+  # ── macOS universal .dmg (Intel + Apple Silicon) ──────────────────────────
   build-mac:
     runs-on: macos-latest
     steps:
@@ -24,16 +27,16 @@ jobs:
       - name: Build macOS Universal DMG
         run: npm run build:mac-universal
         env:
-          CSC_IDENTITY_AUTO_DISCOVERY: false   # skip code signing (no Apple cert needed)
+          CSC_IDENTITY_AUTO_DISCOVERY: false
 
       - name: Upload macOS DMG
         uses: actions/upload-artifact@v4
         with:
-          name: Ledgify-macOS
+          name: Ledgify-macOS-DMG
           path: dist/*.dmg
           retention-days: 30
 
-  # ── Windows .exe installer ────────────────────────────────────────────────
+  # ── Windows NSIS .exe installer ───────────────────────────────────────────
   build-windows:
     runs-on: windows-latest
     steps:
@@ -56,48 +59,54 @@ jobs:
       - name: Upload Windows EXE
         uses: actions/upload-artifact@v4
         with:
-          name: Ledgify-Windows
+          name: Ledgify-Windows-EXE
           path: dist/*.exe
           retention-days: 30
 
-  # ── Create GitHub Release with both installers ────────────────────────────
+  # ── Publish GitHub Release with both installers ───────────────────────────
   release:
     needs: [build-mac, build-windows]
     runs-on: ubuntu-latest
-    permissions:
-      contents: write
     steps:
       - name: Download macOS artifact
         uses: actions/download-artifact@v4
         with:
-          name: Ledgify-macOS
+          name: Ledgify-macOS-DMG
           path: ./release
 
       - name: Download Windows artifact
         uses: actions/download-artifact@v4
         with:
-          name: Ledgify-Windows
+          name: Ledgify-Windows-EXE
           path: ./release
 
-      - name: Create Release
+      - name: List release files
+        run: ls -lh ./release/
+
+      - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
         with:
           tag_name: v1.0.${{ github.run_number }}
-          name: "Ledgify v1.0.${{ github.run_number }}"
+          name: "Ledgify v1.0.${{ github.run_number }} — Smart Books. Happy Business."
           body: |
-            ## Ledgify — Smart Books. Happy Business.
+            ## Ledgify by LedgerLift
 
-            ### Download
-            | Platform | File |
-            |----------|------|
-            | macOS (Intel + Apple Silicon) | `Ledgify-*.dmg` |
-            | Windows 10/11 | `Ledgify-Setup-*.exe` |
+            Free offline accounting app for Indian SME/MSME traders.
 
-            ### Install
-            - **macOS:** Open `.dmg` → drag Ledgify to Applications
-            - **Windows:** Run `.exe` → click Install
+            ### Download Your Installer
 
-            > 100% offline · No internet needed · Your data stays on your computer
+            | Platform | File | Notes |
+            |----------|------|-------|
+            | 🍎 macOS (Intel + M1/M2/M3/M4) | `Ledgify-*.dmg` | Right-click → Open first time |
+            | 🪟 Windows 10/11 | `Ledgify-Setup-*.exe` | Click Install → Done |
+
+            ### Features
+            - GST invoicing (CGST/SGST/IGST auto-calc)
+            - Khata (customer ledger)
+            - Inventory management
+            - TDS tracking
+            - 13 Indian languages
+            - 100% offline · Your data stays on your computer
           files: ./release/*
           draft: false
           prerelease: false
