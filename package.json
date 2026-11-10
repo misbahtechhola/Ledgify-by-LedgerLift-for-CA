@@ -9,7 +9,8 @@
     "start": "electron .",
     "dev": "electron . --dev",
     "build": "electron-builder",
-    "build:mac": "electron-builder --mac --x64 --arm64",
+    "build:mac-x64": "electron-builder --mac --x64",
+    "build:mac-arm64": "electron-builder --mac --arm64",
     "build:mac-universal": "electron-builder --mac --x64 --arm64",
     "build:win": "electron-builder --win",
     "build:linux": "electron-builder --linux"
@@ -25,6 +26,7 @@
     "appId": "com.ledgerlift.ledgify",
     "productName": "Ledgify",
     "copyright": "Copyright © 2026 LedgerLift",
+    "publish": null,
     "directories": {
       "buildResources": "src/assets",
       "output": "dist"
@@ -38,7 +40,7 @@
       "target": [
         {
           "target": "dmg",
-          "arch": ["x64", "arm64"]
+          "arch": ["x64"]
         }
       ],
       "hardenedRuntime": false,
@@ -50,7 +52,8 @@
           "target": "nsis",
           "arch": ["x64"]
         }
-      ]
+      ],
+      "publish": null
     },
     "linux": {
       "target": "AppImage"
@@ -63,7 +66,8 @@
       "createStartMenuShortcut": true
     },
     "dmg": {
-      "title": "Install Ledgify"
+      "title": "Install Ledgify",
+      "writeUpdateInfo": false
     },
     "icon": "src/assets/icon.png"
   }

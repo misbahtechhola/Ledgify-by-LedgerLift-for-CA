@@ -7,7 +7,7 @@ permissions:
   contents: write
   issues: write
 jobs:
-  build-mac:
+  build-mac-x64:
     runs-on: macos-latest
     steps:
       - name: Checkout
@@ -18,26 +18,35 @@ jobs:
           node-version: '20'
       - name: Install
         run: npm ci
-      - name: Build DMG
-        id: build
-        run: npm run build:mac-universal 2>&1 | tee /tmp/build-mac.log; exit ${PIPESTATUS[0]}
+      - name: Build DMG (Intel x64)
+        run: npm run build:mac-x64
         env:
           CSC_IDENTITY_AUTO_DISCOVERY: false
-          DEBUG: electron-builder
-      - name: Report error if failed
-        if: failure() && steps.build.outcome == 'failure'
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          LOG=$(tail -50 /tmp/build-mac.log 2>/dev/null || echo "No log")
-          gh issue create --title "Mac build error (run ${{ github.run_number }})" \
-            --body "$(echo "$LOG")" \
-            --repo "${{ github.repository }}" || true
-      - name: Upload
-        if: success()
+      - name: Upload x64 DMG
         uses: actions/upload-artifact@v4
         with:
-          name: Ledgify-macOS-DMG
+          name: Ledgify-macOS-Intel-DMG
+          path: dist/*.dmg
+          retention-days: 30
+  build-mac-arm64:
+    runs-on: macos-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Install
+        run: npm ci
+      - name: Build DMG (Apple Silicon arm64)
+        run: npm run build:mac-arm64
+        env:
+          CSC_IDENTITY_AUTO_DISCOVERY: false
+      - name: Upload arm64 DMG
+        uses: actions/upload-artifact@v4
+        with:
+          name: Ledgify-macOS-AppleSilicon-DMG
           path: dist/*.dmg
           retention-days: 30
   build-windows:
@@ -52,36 +61,30 @@ jobs:
       - name: Install
         run: npm ci
       - name: Build EXE
-        id: build
-        run: npm run build:win 2>&1 | Tee-Object -FilePath C:\build-win.log; if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+        run: npm run build:win
         env:
           CSC_IDENTITY_AUTO_DISCOVERY: false
-          DEBUG: electron-builder
-      - name: Report error if failed
-        if: failure() && steps.build.outcome == 'failure'
-        shell: pwsh
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          $log = Get-Content C:\build-win.log -Tail 50 -ErrorAction SilentlyContinue | Out-String
-          gh issue create --title "Win build error (run ${{ github.run_number }})" --body "$log" --repo "${{ github.repository }}"
-      - name: Upload
-        if: success()
+      - name: Upload EXE
         uses: actions/upload-artifact@v4
         with:
           name: Ledgify-Windows-EXE
           path: dist/*.exe
           retention-days: 30
   release:
-    needs: [build-mac, build-windows]
+    needs: [build-mac-x64, build-mac-arm64, build-windows]
     runs-on: ubuntu-latest
     steps:
-      - name: Download Mac
+      - name: Download Intel DMG
         uses: actions/download-artifact@v4
         with:
-          name: Ledgify-macOS-DMG
+          name: Ledgify-macOS-Intel-DMG
           path: ./release
-      - name: Download Win
+      - name: Download Apple Silicon DMG
+        uses: actions/download-artifact@v4
+        with:
+          name: Ledgify-macOS-AppleSilicon-DMG
+          path: ./release
+      - name: Download Windows EXE
         uses: actions/download-artifact@v4
         with:
           name: Ledgify-Windows-EXE
