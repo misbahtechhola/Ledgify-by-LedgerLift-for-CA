@@ -1,0 +1,896 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Ledgify — Apna Hisaab, Apni Marzi</title>
+<style>
+:root{
+  --brand:#1A56DB;--brand-d:#1143A6;--brand-l:#EBF0FD;
+  --acc:#E3A008;--acc-l:#FDF6B2;
+  --ok:#0E9F6E;--ok-l:#DEF7EC;
+  --bad:#E02424;--bad-l:#FDE8E8;
+  --warn:#C27803;--warn-l:#FEF3C7;
+  --bg:#F3F4F6;--surf:#fff;--bdr:#E5E7EB;
+  --txt:#111827;--mut:#6B7280;--faint:#9CA3AF;
+  --sw:224px;--th:56px;
+  font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,sans-serif;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{display:flex;flex-direction:column;height:100vh;background:var(--bg);color:var(--txt);font-size:14px;line-height:1.5}
+a{color:inherit;text-decoration:none}
+button{cursor:pointer;font:inherit}
+
+/* ── TOP BAR ── */
+#top{height:var(--th);background:var(--brand);display:flex;align-items:center;gap:12px;padding:0 16px;position:fixed;top:0;left:0;right:0;z-index:100;box-shadow:0 1px 4px #0003}
+#logo{display:flex;align-items:center;gap:8px;color:#fff;font-weight:700;font-size:18px;min-width:var(--sw);padding-right:8px}
+#logo svg{flex-shrink:0}
+#topbiz{color:#cbd5e1;font-size:12px;border-left:1px solid #3d6be0;padding-left:12px;line-height:1.3}
+#topbiz b{display:block;color:#fff;font-size:13px}
+#topsearch{flex:1;background:#2563EB;border:1px solid #3b82f6;border-radius:6px;padding:6px 12px;color:#fff;font:inherit;font-size:13px;outline:none;max-width:320px}
+#topsearch::placeholder{color:#93c5fd}
+.topbtn{background:none;border:none;color:#cbd5e1;padding:6px 10px;border-radius:6px;font-size:13px;display:flex;align-items:center;gap:4px}
+.topbtn:hover{background:#2563EB;color:#fff}
+#langpill{background:#1E40AF;color:#93c5fd;border:1px solid #3b82f6;border-radius:20px;padding:4px 12px;font-size:12px;font-weight:600;cursor:pointer}
+#langpill:hover{background:#1D4ED8;color:#fff}
+
+/* ── LAYOUT ── */
+#wrap{display:flex;flex:1;margin-top:var(--th);overflow:hidden}
+
+/* ── SIDEBAR ── */
+#side{width:var(--sw);background:var(--surf);border-right:1px solid var(--bdr);display:flex;flex-direction:column;overflow-y:auto;position:fixed;top:var(--th);bottom:0;left:0;z-index:50}
+.navsec{font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--faint);padding:16px 14px 6px}
+.navit{display:flex;align-items:center;gap:10px;padding:8px 14px;border-radius:0;cursor:pointer;color:var(--mut);font-size:13px;position:relative;border:none;background:none;width:100%;text-align:left}
+.navit:hover{background:var(--bg);color:var(--txt)}
+.navit.on{background:var(--brand-l);color:var(--brand);font-weight:600}
+.navit .ic{font-size:16px;width:20px;text-align:center}
+.navit .badge{margin-left:auto;background:var(--bad);color:#fff;border-radius:10px;padding:1px 6px;font-size:10px;font-weight:700}
+.navit .ok-badge{margin-left:auto;background:var(--ok);color:#fff;border-radius:10px;padding:1px 6px;font-size:10px}
+#quickadd{margin:12px;border-radius:8px;background:var(--brand);color:#fff;border:none;padding:10px;font:inherit;font-weight:600;font-size:13px;cursor:pointer;width:calc(100% - 24px)}
+#quickadd:hover{background:var(--brand-d)}
+
+/* ── MAIN ── */
+#main{flex:1;margin-left:var(--sw);overflow-y:auto;min-height:0}
+.page{padding:20px}
+.phead{margin-bottom:20px}
+.phead h2{font-size:20px;font-weight:700;color:var(--txt)}
+.phead p{color:var(--mut);font-size:13px;margin-top:3px}
+
+/* ── CARDS / GRID ── */
+.grid{display:grid;gap:14px}
+.g4{grid-template-columns:repeat(4,1fr)}
+.g3{grid-template-columns:repeat(3,1fr)}
+.g2{grid-template-columns:repeat(2,1fr)}
+@media(max-width:900px){.g4{grid-template-columns:repeat(2,1fr)}.g3{grid-template-columns:1fr 1fr}}
+.card{background:var(--surf);border-radius:10px;border:1px solid var(--bdr);padding:16px}
+.kcard{border-radius:10px;padding:16px 20px;position:relative;overflow:hidden}
+.kcard.blue{background:linear-gradient(135deg,#1A56DB,#2563EB);color:#fff}
+.kcard.green{background:linear-gradient(135deg,#0E9F6E,#059669);color:#fff}
+.kcard.amber{background:linear-gradient(135deg,#C27803,#D97706);color:#fff}
+.kcard.red{background:linear-gradient(135deg,#E02424,#DC2626);color:#fff}
+.kcard .kval{font-size:26px;font-weight:800;line-height:1;margin:6px 0}
+.kcard .klbl{font-size:12px;opacity:.85;font-weight:500}
+.kcard .ksub{font-size:11px;opacity:.75;margin-top:4px}
+.kcard .kic{position:absolute;right:16px;top:50%;transform:translateY(-50%);font-size:36px;opacity:.25}
+
+/* ── BUTTONS ── */
+.btn{display:inline-flex;align-items:center;gap:6px;padding:7px 14px;border-radius:6px;font:inherit;font-size:13px;border:1px solid var(--bdr);background:var(--surf);color:var(--txt);cursor:pointer;white-space:nowrap}
+.btn:hover{background:var(--bg)}
+.btn.pri{background:var(--brand);color:#fff;border-color:var(--brand)}
+.btn.pri:hover{background:var(--brand-d)}
+.btn.ok{background:var(--ok);color:#fff;border-color:var(--ok)}
+.btn.red{background:var(--bad);color:#fff;border-color:var(--bad)}
+.btn.sm{padding:4px 10px;font-size:12px}
+.btn.lg{padding:10px 20px;font-size:15px;font-weight:600}
+.row{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+
+/* ── TABLE ── */
+.tw{overflow-x:auto}
+table.t{width:100%;border-collapse:collapse}
+table.t th{background:var(--bg);font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--mut);padding:8px 12px;text-align:left;border-bottom:1px solid var(--bdr);white-space:nowrap}
+table.t td{padding:10px 12px;border-bottom:1px solid #F3F4F6;vertical-align:middle;font-size:13px}
+table.t tr:last-child td{border-bottom:none}
+table.t tr:hover td{background:#fafafa}
+.r{text-align:right}
+.mono{font-family:ui-monospace,monospace;font-size:12px}
+
+/* ── CHIPS / BADGES ── */
+.chip{display:inline-flex;align-items:center;padding:2px 8px;border-radius:12px;font-size:11px;font-weight:600;white-space:nowrap}
+.chip.ok{background:var(--ok-l);color:#065F46}
+.chip.bad{background:var(--bad-l);color:#9B1C1C}
+.chip.warn{background:var(--warn-l);color:#78350F}
+.chip.blue{background:var(--brand-l);color:var(--brand-d)}
+.chip.grey{background:var(--bg);color:var(--mut)}
+.chip.acc{background:var(--acc-l);color:#78350F}
+
+/* ── FORM ELEMENTS ── */
+.in{display:block;width:100%;padding:7px 10px;border:1px solid var(--bdr);border-radius:6px;font:inherit;font-size:13px;background:var(--surf);color:var(--txt);outline:none}
+.in:focus{border-color:var(--brand);box-shadow:0 0 0 3px var(--brand-l)}
+.in.sm{padding:4px 8px;font-size:12px}
+select.in{cursor:pointer}
+.lbl{display:block;font-size:12px;font-weight:600;color:var(--mut);margin-bottom:4px}
+.fgrp{margin-bottom:12px}
+.frow{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.frow3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px}
+
+/* ── MODALS ── */
+#mover{display:none;position:fixed;inset:0;background:#0007;z-index:200;align-items:center;justify-content:center}
+#mover.show{display:flex}
+#mbox{background:var(--surf);border-radius:12px;width:min(560px,95vw);max-height:85vh;display:flex;flex-direction:column;box-shadow:0 20px 60px #0003}
+#mhead{padding:16px 20px;border-bottom:1px solid var(--bdr);display:flex;align-items:center;justify-content:space-between;font-weight:700;font-size:15px}
+#mbody{padding:20px;overflow-y:auto;flex:1}
+#mfoot{padding:12px 20px;border-top:1px solid var(--bdr);display:flex;gap:8px;justify-content:flex-end}
+
+/* ── TOAST ── */
+#toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:#111827;color:#fff;padding:10px 20px;border-radius:8px;font-size:13px;z-index:300;opacity:0;transition:opacity .3s;pointer-events:none;white-space:nowrap}
+#toast.show{opacity:1}
+
+/* ── TABS ── */
+.tabs{display:flex;gap:2px;border-bottom:2px solid var(--bdr);margin-bottom:16px;overflow-x:auto}
+.tab{padding:8px 16px;border:none;background:none;font:inherit;font-size:13px;color:var(--mut);cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-2px;white-space:nowrap}
+.tab.on{color:var(--brand);border-bottom-color:var(--brand);font-weight:600}
+
+/* ── MISC ── */
+.mt{margin-top:16px}
+.mb{margin-bottom:12px}
+.muted{color:var(--mut)}
+.faint{color:var(--faint)}
+.b{font-weight:600}
+.small{font-size:12px}
+.tip{background:var(--brand-l);border-left:3px solid var(--brand);padding:10px 14px;border-radius:0 6px 6px 0;font-size:13px;color:var(--brand-d);margin:12px 0}
+.tip.warn{background:var(--warn-l);border-color:var(--warn);color:var(--warn)}
+.tip.ok{background:var(--ok-l);border-color:var(--ok);color:#065F46}
+.list-it{display:flex;align-items:flex-start;gap:10px;padding:10px 0;border-bottom:1px solid #F9FAFB}
+.list-it:last-child{border-bottom:none}
+.inr::before{content:'₹'}
+.sep{height:1px;background:var(--bdr);margin:16px 0}
+.empty{text-align:center;padding:40px;color:var(--faint)}
+.empty .eic{font-size:40px;margin-bottom:8px}
+.prog{background:var(--bdr);border-radius:4px;height:6px;overflow:hidden}
+.prog-bar{height:100%;border-radius:4px;background:var(--brand);transition:width .4s}
+
+/* ── SALE/INVOICE ── */
+#inv-items table td{padding:6px 8px}
+#inv-items input{border:1px solid var(--bdr);border-radius:4px;padding:4px 6px;font:inherit;font-size:12px;width:100%}
+.inv-total{background:var(--bg);border-radius:8px;padding:12px 16px;text-align:right}
+.inv-total .bigamt{font-size:22px;font-weight:800;color:var(--brand)}
+
+/* ── BANK ANALYZER ── */
+.txn-row{display:grid;grid-template-columns:100px 1fr auto 90px 100px;gap:8px;align-items:center;padding:8px 0;border-bottom:1px solid #F3F4F6;font-size:13px}
+.txn-row:hover{background:#fafafa}
+.cat-pill{padding:2px 8px;border-radius:12px;font-size:11px;font-weight:600}
+.cat-sale{background:#DEF7EC;color:#065F46}
+.cat-pur{background:#EBF0FD;color:#1A56DB}
+.cat-exp{background:#FEF3C7;color:#78350F}
+.cat-tax{background:#FDE8E8;color:#9B1C1C}
+.cat-oth{background:#F3F4F6;color:#374151}
+</style>
+</head>
+<body>
+<!-- TOP BAR -->
+<div id="top">
+  <div id="logo">
+    <svg width="32" height="32" viewBox="0 0 32 32" fill="none">
+      <rect width="32" height="32" rx="8" fill="#fff2"/>
+      <rect x="6" y="8" width="14" height="2" rx="1" fill="#93C5FD"/>
+      <rect x="6" y="13" width="20" height="2" rx="1" fill="#93C5FD"/>
+      <rect x="6" y="18" width="16" height="2" rx="1" fill="#93C5FD"/>
+      <rect x="6" y="23" width="12" height="2" rx="1" fill="#60A5FA"/>
+      <rect x="6" y="8" width="2.5" height="17" rx="1" fill="#fff"/>
+    </svg>
+    <span>Ledgify</span>
+  </div>
+  <div id="topbiz">
+    <b id="topbizname">Sharma Traders</b>
+    <span id="topgstin">GSTIN: 24AAXCS1234B1ZV</span>
+  </div>
+  <input id="topsearch" type="search" placeholder="🔍 Search parties, invoices, items…">
+  <span style="flex:1"></span>
+  <button class="topbtn" data-act="notif">🔔 <span id="ncount" style="background:#E02424;color:#fff;border-radius:10px;padding:1px 5px;font-size:10px">3</span></button>
+  <button class="topbtn" data-act="help">❓ Help</button>
+  <button id="langpill" data-act="langToggle">🌐 हिंदी</button>
+</div>
+
+<!-- SIDEBAR -->
+<div id="side">
+  <button id="quickadd" data-act="quickSale">＋ नई बिक्री / New Sale</button>
+  <div class="navsec" id="ns1">मुख्य / Main</div>
+  <button class="navit" data-id="home"><span class="ic">🏠</span><span data-t="home"></span></button>
+  <button class="navit" data-id="sale"><span class="ic">🧾</span><span data-t="sale"></span><span class="ok-badge" id="saleBadge"></span></button>
+  <button class="navit" data-id="purchase"><span class="ic">📦</span><span data-t="purchase"></span></button>
+  <button class="navit" data-id="inventory"><span class="ic">🏪</span><span data-t="inventory"></span><span class="badge" id="invBadge">2</span></button>
+  <button class="navit" data-id="party"><span class="ic">👥</span><span data-t="party"></span></button>
+  <div class="navsec" id="ns2">Finance</div>
+  <button class="navit" data-id="bank"><span class="ic">🏦</span><span data-t="bank"></span><span class="chip blue sm" style="margin-left:auto;font-size:9px">AI</span></button>
+  <button class="navit" data-id="gst"><span class="ic">🇮🇳</span><span data-t="gst"></span><span class="badge" id="gstBadge"></span></button>
+  <button class="navit" data-id="reports"><span class="ic">📊</span><span data-t="reports"></span></button>
+  <div class="navsec" id="ns3">CA Connect</div>
+  <button class="navit" data-id="ca"><span class="ic">🤝</span><span data-t="ca"></span></button>
+  <div class="navsec" id="ns4">सेटिंग / Settings</div>
+  <button class="navit" data-id="settings"><span class="ic">⚙️</span><span data-t="settings"></span></button>
+  <button class="navit" data-id="help2"><span class="ic">📖</span><span data-t="helpNav"></span></button>
+  <div style="margin:8px 14px 16px;padding:10px;background:var(--brand-l);border-radius:8px">
+    <div style="font-size:11px;font-weight:700;color:var(--brand)">LedgerLift Smart BSA</div>
+    <div style="font-size:11px;color:var(--mut);margin-top:2px" id="bsaStatus">Bank recon: 18/20 matched ✓</div>
+  </div>
+</div>
+
+<!-- MAIN -->
+<div id="wrap"><div style="width:var(--sw);flex-shrink:0"></div><div id="main"><div id="page" class="page"></div></div></div>
+
+<!-- MODAL -->
+<div id="mover"><div id="mbox"><div id="mhead"><span id="mtitle"></span><button onclick="closeMod()" style="background:none;border:none;font-size:18px;cursor:pointer;color:var(--mut)">✕</button></div><div id="mbody"></div><div id="mfoot"></div></div></div>
+<div id="toast"></div>
+<script>
+// ═══════════════════════════════════════════
+// LEDGIFY v1.0 — by LedgerLift
+// Offline desktop app for Indian MSME traders
+// Target: ₹2Cr–₹15Cr revenue, traders/retailers/manufacturers
+// ═══════════════════════════════════════════
+
+// ── MULTILINGUAL ──
+const LANG={
+en:{
+  appTag:'Your Books, Your Way',
+  home:'Dashboard',sale:'Sales',purchase:'Purchases',
+  inventory:'Inventory',party:'Parties',bank:'Bank Analyzer',
+  gst:'GST',reports:'Reports',ca:'CA Connect',settings:'Settings',
+  helpNav:'Help & Manual',
+  todaySale:'Today\'s Sales',outstanding:'Outstanding',
+  lowStock:'Low Stock',gstDue:'GST Payable',
+  newSale:'New Sale',newPurchase:'New Purchase',
+  invoiceNo:'Invoice No.',partyName:'Party Name',
+  items:'Items',amount:'Amount',status:'Status',date:'Date',
+  paid:'Paid',unpaid:'Unpaid',partial:'Partial',
+  addItem:'Add Item',save:'Save',print:'Print',
+  whatsapp:'Send on WhatsApp',
+  bankStmt:'Bank Statement Analyzer',upload:'Upload Statement',
+  matched:'Auto-matched',unmatched:'Needs Review',
+  category:'Category',credit:'Credit',debit:'Debit',balance:'Balance',
+  gstrSummary:'GSTR Summary',itc:'ITC Available',netPayable:'Net Payable',
+  filing:'Filing Status',
+  caExport:'Export to CA',caStatus:'CA Status',
+  bizName:'Business Name',gstin:'GSTIN',address:'Address',
+  language:'Language',backup:'Backup Data',
+  help:'Help Center',
+  ns1:'Main',ns2:'Finance',ns3:'CA Connect',ns4:'Settings',
+  quickSale:'＋ New Sale',
+  overdue:'Overdue',dueSoon:'Due Soon',
+  stockAlert:'Low Stock Alert',
+  tip1:'💡 Tip: Upload your bank statement to auto-match 90%+ transactions.',
+  tip2:'💡 Your CA can receive a one-click data package from CA Connect.',
+  tip3:'💡 GST 2.0 rate slabs (Sep 2025): 0/5/18/40%. Ledgify is updated.',
+},
+hi:{
+  appTag:'अपना हिसाब, अपनी मर्जी',
+  home:'डैशबोर्ड',sale:'बिक्री',purchase:'खरीद',
+  inventory:'माल-स्टॉक',party:'पार्टियाँ',bank:'बैंक विश्लेषक',
+  gst:'जीएसटी',reports:'रिपोर्ट',ca:'CA कनेक्ट',settings:'सेटिंग',
+  helpNav:'सहायता और मैनुअल',
+  todaySale:'आज की बिक्री',outstanding:'बकाया',
+  lowStock:'कम स्टॉक',gstDue:'जीएसटी देय',
+  newSale:'नई बिक्री',newPurchase:'नई खरीद',
+  invoiceNo:'इनवॉइस नं.',partyName:'पार्टी का नाम',
+  items:'आइटम',amount:'राशि',status:'स्थिति',date:'तारीख',
+  paid:'भुगतान हुआ',unpaid:'बकाया',partial:'आंशिक',
+  addItem:'आइटम जोड़ें',save:'सहेजें',print:'प्रिंट',
+  whatsapp:'WhatsApp पर भेजें',
+  bankStmt:'बैंक स्टेटमेंट विश्लेषक',upload:'स्टेटमेंट अपलोड करें',
+  matched:'स्वत: मिलान',unmatched:'समीक्षा चाहिए',
+  category:'श्रेणी',credit:'जमा',debit:'निकास',balance:'शेष',
+  gstrSummary:'GSTR सारांश',itc:'ITC उपलब्ध',netPayable:'कुल देय',
+  filing:'फाइलिंग स्थिति',
+  caExport:'CA को भेजें',caStatus:'CA स्थिति',
+  bizName:'व्यापार का नाम',gstin:'GSTIN',address:'पता',
+  language:'भाषा',backup:'डेटा बैकअप',
+  help:'सहायता केंद्र',
+  ns1:'मुख्य',ns2:'वित्त',ns3:'CA कनेक्ट',ns4:'सेटिंग',
+  quickSale:'＋ नई बिक्री',
+  overdue:'अतिदेय',dueSoon:'जल्द देय',
+  stockAlert:'कम स्टॉक सूचना',
+  tip1:'💡 टिप: बैंक स्टेटमेंट अपलोड करें — 90%+ लेनदेन अपने आप मिल जाते हैं।',
+  tip2:'💡 CA को एक क्लिक में सारा डेटा भेजें — CA Connect से।',
+  tip3:'💡 GST 2.0 नई दरें (सितम्बर 2025): 0/5/18/40%। Ledgify अपडेट है।',
+}};
+let L=LANG.hi; // default Hindi
+
+// ── SAMPLE DATA ──
+const BIZ={name:'Sharma Traders',gstin:'24AAXCS1234B1ZV',addr:'Shop 12, Sardar Patel Market, Ahmedabad - 380001, Gujarat',phone:'98250 44321',ca:'CA Meera Iyer (Iyer & Associates)',caPhone:'98210 55432',fy:'2026-27',bank:'Axis Bank CA — XX4521'};
+
+const PARTIES=[
+  {id:'p1',name:'Mobile Point',gstin:'24BBBCS4321A1ZX',city:'Surat',type:'cust',bal:215000,due:'2026-10-26',overdue:true},
+  {id:'p2',name:'Tech World',gstin:'24CCCDS5432B2ZY',city:'Vadodara',type:'cust',bal:110000,due:'2026-11-13',overdue:false},
+  {id:'p3',name:'Galaxy Electronics',gstin:'24DDDFS6543C3ZZ',city:'Rajkot',type:'cust',bal:78000,due:'2026-11-10',overdue:false},
+  {id:'p4',name:'Digital Hub',gstin:'24EEEGS7654D4ZW',city:'Ahmedabad',type:'cust',bal:32000,due:'2026-11-18',overdue:false},
+  {id:'p5',name:'Samsung India',gstin:'07AAACS1234A1ZE',city:'Delhi',type:'supp',bal:-845000,due:'2026-11-20',overdue:false},
+  {id:'p6',name:'Xiaomi Technology',gstin:'07BBBDS2345B2ZF',city:'Delhi',type:'supp',bal:-320000,due:'2026-11-25',overdue:false},
+  {id:'p7',name:'Reliance Digital',gstin:'27CCCFS3456C3ZG',city:'Mumbai',type:'both',bal:0,due:null,overdue:false},
+];
+
+const INV=[
+  {id:'LG-001',date:'2026-11-05',party:'p1',items:3,amt:215000,tax:38700,total:253700,st:'unpaid',due:'2026-11-20'},
+  {id:'LG-002',date:'2026-11-07',party:'p2',items:2,amt:92437,tax:16638,total:109075,st:'paid',due:'2026-11-22'},
+  {id:'LG-003',date:'2026-11-08',party:'p3',items:1,amt:65546,tax:11798,total:77344,st:'unpaid',due:'2026-11-23'},
+  {id:'LG-004',date:'2026-11-09',party:'p4',items:4,amt:27311,tax:4916,total:32227,st:'partial',due:'2026-11-24'},
+  {id:'LG-005',date:'2026-11-10',party:'p1',items:2,amt:118487,tax:21328,total:139815,st:'unpaid',due:'2026-11-25'},
+];
+
+const ITEMS=[
+  {id:'i1',name:'Samsung Galaxy A35',sku:'SGA35',hsn:'8517',gst:18,unit:'Pcs',stock:45,min:10,price:18500,cost:16000},
+  {id:'i2',name:'Xiaomi Redmi 13C',sku:'XRM13C',hsn:'8517',gst:18,unit:'Pcs',stock:120,min:20,price:8999,cost:7500},
+  {id:'i3',name:'iPhone 15 (128GB)',sku:'IP15128',hsn:'8517',gst:18,unit:'Pcs',stock:3,min:5,price:79000,cost:72000},
+  {id:'i4',name:'Mobile Cover Combo',sku:'MCC01',hsn:'3926',gst:18,unit:'Set',stock:500,min:50,price:150,cost:80},
+  {id:'i5',name:'Fast Charger 65W',sku:'FC65W',hsn:'8504',gst:18,unit:'Pcs',stock:200,min:30,price:450,cost:320},
+  {id:'i6',name:'Samsung Galaxy S24',sku:'SGS24',hsn:'8517',gst:18,unit:'Pcs',stock:7,min:3,price:74999,cost:68000},
+];
+
+const BANK_TXN=[
+  {date:'2026-11-10',desc:'NEFT FROM MOBILE POINT LTD 00123456',cr:145000,dr:0,bal:1245600,cat:'sale',party:'p1',auto:true},
+  {date:'2026-11-10',desc:'UPI CRED SALARY NOV 2026',cr:0,dr:85000,bal:1100600,cat:'exp',party:null,auto:true,note:'Salary - Staff'},
+  {date:'2026-11-09',desc:'NEFT FROM TECH WORLD ELECTRONICS',cr:89000,dr:0,bal:1185600,cat:'sale',party:'p2',auto:true},
+  {date:'2026-11-08',desc:'IMPS TO SAMSUNG INDIA PVT LTD',cr:0,dr:525000,bal:1096600,cat:'pur',party:'p5',auto:true},
+  {date:'2026-11-07',desc:'NEFT FROM GALAXY ELECTRONICS RAJKOT',cr:210000,dr:0,bal:1621600,cat:'sale',party:'p3',auto:true},
+  {date:'2026-11-07',desc:'AXIS BANK CC BILL PMT',cr:0,dr:34500,bal:1411600,cat:'exp',party:null,auto:true,note:'Credit Card Bill'},
+  {date:'2026-11-06',desc:'POS COURIER SERVICES DTDC',cr:0,dr:2100,bal:1446100,cat:'exp',party:null,auto:true,note:'Courier'},
+  {date:'2026-11-05',desc:'NEFT FROM DIGITAL HUB AHMEDABAD',cr:178500,dr:0,bal:1448200,cat:'sale',party:'p4',auto:true},
+  {date:'2026-11-05',desc:'GST PMT CPIN2026110500123',cr:0,dr:45678,bal:1269700,cat:'tax',party:null,auto:true,note:'GST Nov 2026'},
+  {date:'2026-11-04',desc:'RENT NOV 2026 SARDAR MARKET',cr:0,dr:35000,bal:1315378,cat:'exp',party:null,auto:true,note:'Shop Rent'},
+  {date:'2026-11-03',desc:'NEFT XIAOMI TECHNOLOGY INDIA',cr:0,dr:320000,bal:1350378,cat:'pur',party:'p6',auto:true},
+  {date:'2026-11-02',desc:'ELECTRICITY TORRENT POWER OCT26',cr:0,dr:8500,bal:1670378,cat:'exp',party:null,auto:true,note:'Electricity'},
+  {date:'2026-11-01',desc:'INTEREST CREDIT OCT 2026',cr:3200,bal:1678878,cat:'oth',party:null,auto:true,note:'Bank Interest'},
+  {date:'2026-10-31',desc:'TRF TO SAVINGS A/C HDFC 00987',cr:0,dr:50000,bal:1675678,cat:'oth',party:null,auto:false},
+  {date:'2026-10-30',desc:'POS PETROL PUMP INDIAN OIL',cr:0,dr:1500,bal:1725678,cat:'exp',party:null,auto:true,note:'Fuel'},
+  {date:'2026-10-29',desc:'NEFT FROM MOBILE POINT LTD',cr:93000,dr:0,bal:1727178,cat:'sale',party:'p1',auto:true},
+  {date:'2026-10-28',desc:'IMPS UNKNOWN 9876543210',cr:0,dr:12000,bal:1634178,cat:'oth',party:null,auto:false},
+  {date:'2026-10-27',desc:'PROFESSIONAL FEES CS RAVI MEHTA',cr:0,dr:5000,bal:1646178,cat:'exp',party:null,auto:true,note:'Professional Fees'},
+  {date:'2026-10-26',desc:'NEFT SAMSUNG INDIA PVT LTD',cr:0,dr:420000,bal:1651178,cat:'pur',party:'p5',auto:true},
+  {date:'2026-10-25',desc:'NEFT FROM GALAXY ELECTRONICS',cr:120000,dr:0,bal:2071178,cat:'sale',party:'p3',auto:true},
+];
+
+const GST_DATA={
+  month:'November 2026',fy:'2026-27',
+  sales:{taxable:1845000,cgst:147600,sgst:147600,igst:0},
+  pur:{taxable:2345000,cgst:187600,sgst:187600,igst:0},
+  itcAvail:245000,netPay:50200,
+  r1:{status:'Draft',items:38,due:'2026-12-11'},
+  r3b:{status:'Due',due:'2026-12-20'},
+  r2b:{matched:31,mismatched:4,missing:3},
+};
+
+// ── STATE ──
+const S={
+  page:'home',lang:'hi',
+  saleTab:'list',bankTab:'txn',gstTab:'sum',repTab:'pl',
+  newInv:{party:'',items:[{name:'',qty:1,price:0,gst:18}],notes:''},
+  caStatus:'ready',helpTab:'guide',
+};
+
+// ── UTILS ──
+const $=q=>document.querySelector(q);
+const $$=q=>document.querySelectorAll(q);
+const esc=s=>String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+const inr=n=>Number(n).toLocaleString('en-IN',{minimumFractionDigits:0,maximumFractionDigits:0});
+const fds=s=>{const d=new Date(s);return d.toLocaleDateString('en-IN',{day:'2-digit',month:'short',year:'2-digit'})};
+const pname=id=>{const p=PARTIES.find(x=>x.id===id);return p?p.name:id};
+const lowItems=()=>ITEMS.filter(x=>x.stock<=x.min);
+
+function toast(msg,ms=2800){
+  const t=$('#toast');t.textContent=msg;t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'),ms);
+}
+function modal(title,body,btns=[]){
+  $('#mtitle').textContent=title;$('#mbody').innerHTML=body;
+  const f=$('#mfoot');f.innerHTML='';
+  if(!btns.length)btns=[{t:'Close'}];
+  btns.forEach(b=>{
+    const el=document.createElement('button');
+    el.className='btn '+(b.cls||'');el.textContent=b.t;
+    el.onclick=()=>{closeMod();b.f&&b.f()};f.appendChild(el);
+  });
+  $('#mover').classList.add('show');
+}
+function closeMod(){$('#mover').classList.remove('show')}
+
+// ── TRANSLATE SIDEBAR ──
+function applyLang(){
+  L=LANG[S.lang];
+  document.querySelectorAll('[data-t]').forEach(el=>{
+    const k=el.dataset.t;if(L[k])el.textContent=L[k];
+  });
+  $('#quickadd').textContent=L.quickSale;
+  $('#langpill').textContent=S.lang==='hi'?'🌐 English':'🌐 हिंदी';
+  $('#ns1').textContent=L.ns1;$('#ns2').textContent=L.ns2;
+  $('#ns3').textContent=L.ns3;$('#ns4').textContent=L.ns4;
+}
+</script>
+<script>
+// ── MODULE RENDERERS ──
+const R={};
+
+R.home=()=>{
+  const totSales=INV.filter(x=>x.date==='2026-11-10').reduce((a,b)=>a+b.total,0);
+  const outstanding=PARTIES.filter(x=>x.type==='cust'&&x.bal>0).reduce((a,b)=>a+b.bal,0);
+  const overdueP=PARTIES.filter(x=>x.overdue&&x.bal>0);
+  const low=lowItems();
+  return `<div class="phead">
+    <h2>🏠 ${L.home}</h2>
+    <p>${BIZ.name} &nbsp;·&nbsp; ${new Date().toLocaleDateString('en-IN',{weekday:'long',day:'numeric',month:'long',year:'numeric'})}</p>
+  </div>
+  <div class="tip">${L.tip1}</div>
+  <div class="grid g4 mb">
+    <div class="kcard blue"><div class="klbl">${L.todaySale}</div><div class="kval">₹${inr(totSales||253700)}</div><div class="ksub">↑ 12% vs last week</div><div class="kic">🧾</div></div>
+    <div class="kcard amber"><div class="klbl">${L.outstanding} (Receivable)</div><div class="kval">₹${inr(outstanding)}</div><div class="ksub">${overdueP.length} parties overdue</div><div class="kic">⏰</div></div>
+    <div class="kcard green"><div class="klbl">Month Sales</div><div class="kval">₹${inr(1845000)}</div><div class="ksub">38 invoices · Oct 2026</div><div class="kic">📈</div></div>
+    <div class="kcard red"><div class="klbl">${L.gstDue}</div><div class="kval">₹${inr(50200)}</div><div class="ksub">Due: 20 Dec 2026</div><div class="kic">🇮🇳</div></div>
+  </div>
+  <div class="grid g2">
+    <div class="card">
+      <div class="b mb">${L.overdue} — Action Required</div>
+      ${overdueP.map(p=>`<div class="list-it">
+        <span style="font-size:18px">⚠️</span>
+        <div style="flex:1"><div class="b">${esc(p.name)}</div><div class="small muted">${p.city} · Due: ${fds(p.due)}</div></div>
+        <div style="text-align:right"><div class="b" style="color:var(--bad)">₹${inr(p.bal)}</div>
+        <button class="btn sm" onclick="wa('${esc(p.name)}',${p.bal})" style="margin-top:4px">📱 WhatsApp</button></div>
+      </div>`).join('')}
+      ${overdueP.length===0?'<div class="empty"><div class="eic">🎉</div>No overdue parties</div>':''}
+    </div>
+    <div class="card">
+      <div class="b mb">${L.stockAlert}</div>
+      ${low.map(it=>`<div class="list-it">
+        <span style="font-size:18px">📦</span>
+        <div style="flex:1"><div class="b">${esc(it.name)}</div><div class="small muted">SKU: ${it.sku}</div></div>
+        <div style="text-align:right"><div class="chip bad">Stock: ${it.stock}</div><div class="small muted">Min: ${it.min}</div></div>
+      </div>`).join('')}
+      ${low.length===0?'<div class="empty"><div class="eic">✅</div>All stock healthy</div>':''}
+      <div class="tip mt">💡 Low stock items: reorder before they run out to avoid losing sales.</div>
+    </div>
+  </div>
+  <div class="card mt">
+    <div class="b mb">Recent Invoices</div>
+    <div class="tw"><table class="t">
+      <tr><th>#</th><th>Party</th><th>Date</th><th class="r">Amount</th><th>Status</th><th></th></tr>
+      ${INV.slice(0,5).map(inv=>`<tr>
+        <td class="mono">${inv.id}</td>
+        <td class="b">${esc(pname(inv.party))}</td>
+        <td>${fds(inv.date)}</td>
+        <td class="r b">₹${inr(inv.total)}</td>
+        <td><span class="chip ${inv.st==='paid'?'ok':inv.st==='partial'?'warn':'bad'}">${L[inv.st]||inv.st}</span></td>
+        <td><button class="btn sm" data-act="viewInv" data-id="${inv.id}">View</button></td>
+      </tr>`).join('')}
+    </table></div>
+  </div>
+  <div class="grid g3 mt">
+    <button class="btn lg pri" data-act="go" data-id="sale">🧾 ${L.newSale}</button>
+    <button class="btn lg" data-act="go" data-id="bank">🏦 Analyze Bank Statement</button>
+    <button class="btn lg" data-act="go" data-id="ca">🤝 Send Data to CA</button>
+  </div>`;
+};
+
+R.sale=()=>{
+  const tabs=[['list','Invoice List'],['new','New Invoice']];
+  return `<div class="phead"><h2>🧾 ${L.sale}</h2><p>Bills, invoices, credit notes</p></div>
+  <div class="tabs">${tabs.map(([k,v])=>`<button class="tab ${S.saleTab===k?'on':''}" data-act="saleTab" data-k="${k}">${v}</button>`).join('')}</div>
+  ${S.saleTab==='list'?`
+    <div class="row mb"><button class="btn pri" data-act="saleTab" data-k="new">＋ ${L.newSale}</button><span style="flex:1"></span>
+    <span class="chip ok">Total: ₹${inr(INV.reduce((a,b)=>a+b.total,0))}</span></div>
+    <div class="card"><div class="tw"><table class="t">
+      <tr><th>${L.invoiceNo}</th><th>${L.partyName}</th><th>${L.date}</th><th>Due</th><th class="r">${L.amount}</th><th>${L.status}</th><th></th></tr>
+      ${INV.map(inv=>`<tr>
+        <td class="mono b">${inv.id}</td><td>${esc(pname(inv.party))}</td>
+        <td>${fds(inv.date)}</td><td class="${new Date(inv.due)<new Date()&&inv.st!=='paid'?'b" style="color:var(--bad)':'muted'}">${fds(inv.due)}</td>
+        <td class="r b">₹${inr(inv.total)}</td>
+        <td><span class="chip ${inv.st==='paid'?'ok':inv.st==='partial'?'warn':'bad'}">${L[inv.st]||inv.st}</span></td>
+        <td><button class="btn sm" data-act="viewInv" data-id="${inv.id}">View</button>
+            <button class="btn sm" onclick="wa('${esc(pname(inv.party))}',${inv.total})" title="WhatsApp">📱</button></td>
+      </tr>`).join('')}
+    </table></div></div>` : newInvForm()}`;
+};
+
+function newInvForm(){
+  const its=S.newInv.items;
+  const sub=its.reduce((a,b)=>a+(b.qty*b.price),0);
+  const tax=its.reduce((a,b)=>a+(b.qty*b.price*b.gst/100),0);
+  return `<div class="card">
+    <div class="frow mb"><div class="fgrp">
+      <label class="lbl">Party Name / पार्टी</label>
+      <select class="in" onchange="S.newInv.party=this.value">
+        <option value="">-- Select Party --</option>
+        ${PARTIES.map(p=>`<option value="${p.id}">${esc(p.name)} (${p.city})</option>`).join('')}
+      </select></div>
+      <div class="fgrp"><label class="lbl">Invoice Date</label>
+      <input type="date" class="in" value="2026-11-10"></div>
+    </div>
+    <div class="b mb">Items / माल</div>
+    <div id="inv-items"><table class="t">
+      <tr><th>Item</th><th style="width:70px">Qty</th><th style="width:110px">Rate (₹)</th><th style="width:60px">GST%</th><th class="r">Amount</th><th></th></tr>
+      ${its.map((it,i)=>`<tr>
+        <td><select class="in sm" onchange="pickItem(${i},this.value)">
+          <option value="">-- Select Item --</option>
+          ${ITEMS.map(x=>`<option value="${x.id}" ${it._id===x.id?'selected':''}>${esc(x.name)}</option>`).join('')}
+        </select></td>
+        <td><input type="number" class="in sm" value="${it.qty}" min="1" onchange="S.newInv.items[${i}].qty=+this.value;render()"></td>
+        <td><input type="number" class="in sm" value="${it.price}" onchange="S.newInv.items[${i}].price=+this.value;render()"></td>
+        <td><input type="number" class="in sm" value="${it.gst}" onchange="S.newInv.items[${i}].gst=+this.value;render()"></td>
+        <td class="r mono">₹${inr(it.qty*it.price)}</td>
+        <td><button onclick="S.newInv.items.splice(${i},1);render()" class="btn sm red">✕</button></td>
+      </tr>`).join('')}
+    </table></div>
+    <button class="btn sm mt" onclick="S.newInv.items.push({name:'',qty:1,price:0,gst:18});render()">＋ ${L.addItem}</button>
+    <div class="inv-total mt">
+      <div>Taxable: <b>₹${inr(sub)}</b></div>
+      <div>CGST (${its[0]?.gst/2||9}%): ₹${inr(tax/2)} + SGST: ₹${inr(tax/2)}</div>
+      <div class="bigamt mt">Total: ₹${inr(sub+tax)}</div>
+    </div>
+    <div class="row mt">
+      <button class="btn pri" data-act="saveInv">💾 ${L.save} & Print</button>
+      <button class="btn" onclick="wa('client',${Math.round(sub+tax)})">📱 ${L.whatsapp}</button>
+      <button class="btn" data-act="saleTab" data-k="list">Cancel</button>
+    </div>
+    <div class="tip mt">💡 Invoice will also go to your CA's data package automatically.</div>
+  </div>`;
+}
+
+R.inventory=()=>{
+  const low=lowItems();
+  return `<div class="phead"><h2>🏪 ${L.inventory}</h2><p>Stock levels, alerts, item master</p></div>
+  ${low.length?`<div class="tip warn">⚠️ ${low.length} items below minimum stock: ${low.map(x=>x.name).join(', ')}</div>`:''}
+  <div class="card"><div class="tw"><table class="t">
+    <tr><th>Item</th><th>SKU</th><th>HSN</th><th class="r">Stock</th><th class="r">Min</th><th class="r">Sale Price</th><th class="r">Cost</th><th>Status</th></tr>
+    ${ITEMS.map(it=>`<tr>
+      <td class="b">${esc(it.name)}</td><td class="mono">${it.sku}</td><td class="mono">${it.hsn}</td>
+      <td class="r"><b style="color:${it.stock<=it.min?'var(--bad)':'var(--ok)'}">${it.stock}</b></td>
+      <td class="r muted">${it.min}</td>
+      <td class="r">₹${inr(it.price)}</td>
+      <td class="r muted">₹${inr(it.cost)}</td>
+      <td><span class="chip ${it.stock<=it.min?'bad':'ok'}">${it.stock<=it.min?'Low Stock':'OK'}</span></td>
+    </tr>`).join('')}
+  </table></div>
+  <div class="tip mt">💡 Set minimum stock levels to get automatic alerts before stock runs out.</div></div>`;
+};
+
+R.party=()=>`<div class="phead"><h2>👥 ${L.party}</h2><p>Customers, suppliers, their ledgers</p></div>
+  <div class="row mb"><button class="btn pri" data-act="addParty">＋ Add Party</button></div>
+  <div class="card"><div class="tw"><table class="t">
+    <tr><th>Name</th><th>City</th><th>Type</th><th>GSTIN</th><th class="r">Balance</th><th>Status</th><th></th></tr>
+    ${PARTIES.map(p=>`<tr>
+      <td class="b">${esc(p.name)}</td><td>${p.city}</td>
+      <td><span class="chip ${p.type==='cust'?'ok':p.type==='supp'?'blue':'grey'}">${p.type==='cust'?'Customer':p.type==='supp'?'Supplier':'Both'}</span></td>
+      <td class="mono small">${p.gstin||'—'}</td>
+      <td class="r b" style="color:${p.bal>0?'var(--ok)':p.bal<0?'var(--bad)':'var(--mut)'}">₹${inr(Math.abs(p.bal))}</td>
+      <td>${p.overdue?'<span class="chip bad">Overdue</span>':p.due?`<span class="chip ${new Date(p.due)<new Date()?'bad':'grey'}">Due ${fds(p.due)}</span>`:'<span class="chip ok">Clear</span>'}</td>
+      <td><button class="btn sm" onclick="wa('${esc(p.name)}',${p.bal})">📱</button></td>
+    </tr>`).join('')}
+  </table></div></div>`;
+</script>
+<script>
+R.bank=()=>{
+  const tabs=[['txn','Transactions'],['recon','Reconciliation'],['upload','Upload New']];
+  const auto=BANK_TXN.filter(x=>x.auto);
+  const unmatched=BANK_TXN.filter(x=>!x.auto);
+  const totalCr=BANK_TXN.filter(x=>x.cr).reduce((a,b)=>a+(b.cr||0),0);
+  const totalDr=BANK_TXN.filter(x=>x.dr).reduce((a,b)=>a+(b.dr||0),0);
+  return `<div class="phead">
+    <h2>🏦 ${L.bankStmt} <span class="chip blue" style="font-size:12px">AI Powered · LedgerLift</span></h2>
+    <p>Axis Bank Current A/c XX4521 — Loaded: Nov 2026 statement (${BANK_TXN.length} transactions)</p>
+  </div>
+  <div class="grid g4 mb">
+    <div class="card" style="border-left:4px solid var(--ok)"><div class="klbl">Total Credits</div><div class="kval" style="font-size:20px;font-weight:800;color:var(--ok)">₹${inr(totalCr)}</div></div>
+    <div class="card" style="border-left:4px solid var(--bad)"><div class="klbl">Total Debits</div><div class="kval" style="font-size:20px;font-weight:800;color:var(--bad)">₹${inr(totalDr)}</div></div>
+    <div class="card" style="border-left:4px solid var(--brand)"><div class="klbl">Auto-matched</div><div class="kval" style="font-size:20px;font-weight:800;color:var(--brand)">${auto.length}/${BANK_TXN.length}</div><div class="small muted">AI confidence: 94%</div></div>
+    <div class="card" style="border-left:4px solid var(--warn)"><div class="klbl">Needs Review</div><div class="kval" style="font-size:20px;font-weight:800;color:var(--warn)">${unmatched.length}</div><div class="small muted">Manual categorise</div></div>
+  </div>
+  <div class="tip">💡 LedgerLift AI reads your bank statement and auto-categorises 90%+ transactions — party name, type, and GL account. <b>No manual entry needed.</b></div>
+  <div class="tabs">${tabs.map(([k,v])=>`<button class="tab ${S.bankTab===k?'on':''}" data-act="bankTab" data-k="${k}">${v}</button>`).join('')}</div>
+  ${S.bankTab==='txn'?bankTxnView():S.bankTab==='recon'?bankReconView():bankUploadView()}`;
+};
+
+function bankTxnView(){
+  return `<div class="card">
+    <div class="row mb"><span class="b">${BANK_TXN.length} transactions — ${BANK_TXN.filter(x=>x.auto).length} auto-categorised</span>
+      <span style="flex:1"></span>
+      <button class="btn sm ok" data-act="exportBank">📤 Export to CA / Tally</button></div>
+    <div class="tw"><table class="t">
+      <tr><th>Date</th><th>Description</th><th>Category</th><th class="r">Credit</th><th class="r">Debit</th><th>Party / Note</th><th>AI</th></tr>
+      ${BANK_TXN.map(t=>`<tr>
+        <td class="mono small">${fds(t.date)}</td>
+        <td style="max-width:220px;font-size:12px">${esc(t.desc)}</td>
+        <td>${t.cat?`<span class="cat-pill cat-${t.cat}">${{sale:'Sale',pur:'Purchase',exp:'Expense',tax:'Tax/GST',oth:'Other'}[t.cat]}</span>`:'—'}</td>
+        <td class="r ${t.cr?'b':'muted'}" style="color:var(--ok)">${t.cr?'₹'+inr(t.cr):'—'}</td>
+        <td class="r ${t.dr?'b':'muted'}" style="color:var(--bad)">${t.dr?'₹'+inr(t.dr):'—'}</td>
+        <td class="small">${t.party?`<b>${esc(pname(t.party))}</b>`:esc(t.note||'')}</td>
+        <td>${t.auto?'<span class="chip ok" title="AI auto-matched">✓ AI</span>':'<button class="btn sm warn" data-act="fixTxn">Fix</button>'}</td>
+      </tr>`).join('')}
+    </table></div></div>`;
+}
+
+function bankReconView(){
+  const catTotals={sale:0,pur:0,exp:0,tax:0,oth:0};
+  BANK_TXN.forEach(t=>{if(t.cat){if(t.cr)catTotals[t.cat]+=t.cr;if(t.dr)catTotals[t.cat]+=t.dr;}});
+  return `<div class="grid g2">
+    <div class="card"><h3 class="mb">Bank vs Books Reconciliation</h3>
+      <div class="list-it"><div class="b" style="flex:1">Bank Closing Balance (Nov 10)</div><div class="b">₹${inr(1245600)}</div></div>
+      <div class="list-it"><div style="flex:1">Books Balance (Tally/Ledger)</div><div class="b">₹${inr(1239800)}</div></div>
+      <div class="list-it"><div style="flex:1;color:var(--warn)">Difference</div><div class="b" style="color:var(--warn)">₹${inr(5800)}</div></div>
+      <div class="tip warn mt">2 transactions not in Tally: ₹5,800. Review and post these.</div>
+      <button class="btn pri sm mt" data-act="exportTally">Export Tally XML</button>
+    </div>
+    <div class="card"><h3 class="mb">Expense Breakdown</h3>
+      ${Object.entries({sale:'Customer Receipts',pur:'Supplier Payments',exp:'Business Expenses',tax:'Tax & GST',oth:'Other / Unknown'}).map(([k,v])=>`
+      <div class="list-it"><div style="flex:1">${v}</div>
+      <div class="b">₹${inr(catTotals[k]||0)}</div></div>`).join('')}
+    </div></div>`;
+}
+
+function bankUploadView(){
+  return `<div class="card" style="text-align:center;padding:40px">
+    <div style="font-size:48px;margin-bottom:16px">🏦</div>
+    <h3>Upload Bank Statement</h3>
+    <p class="muted mt" style="margin-bottom:20px">Supports: Axis Bank, HDFC, ICICI, SBI, Kotak, Yes Bank PDF/CSV exports</p>
+    <label class="btn lg pri" style="cursor:pointer">📎 Choose File (PDF / CSV / Excel)
+      <input type="file" accept=".pdf,.csv,.xlsx,.xls" hidden onchange="toast('✓ File loaded — AI categorising transactions...')">
+    </label>
+    <div class="tip mt" style="text-align:left">💡 Just export your bank statement from net banking and drop it here. LedgerLift reads any format and auto-fills the transactions table.</div>
+  </div>`;
+}
+
+R.gst=()=>{
+  const tabs=[['sum','Summary'],['r2b','2B Reconciliation'],['status','Filing Status']];
+  return `<div class="phead"><h2>🇮🇳 ${L.gst}</h2><p>${GST_DATA.month} · ${GST_DATA.fy}</p></div>
+  <div class="tabs">${tabs.map(([k,v])=>`<button class="tab ${S.gstTab===k?'on':''}" data-act="gstTab" data-k="${k}">${v}</button>`).join('')}</div>
+  ${S.gstTab==='sum'?gstSumView():S.gstTab==='r2b'?gst2BView():gstStatusView()}`;
+};
+
+function gstSumView(){
+  return `<div class="grid g3 mb">
+    <div class="kcard blue"><div class="klbl">Taxable Sales</div><div class="kval">₹${inr(GST_DATA.sales.taxable)}</div></div>
+    <div class="kcard green"><div class="klbl">${L.itc}</div><div class="kval">₹${inr(GST_DATA.itcAvail)}</div></div>
+    <div class="kcard red"><div class="klbl">${L.netPayable}</div><div class="kval">₹${inr(GST_DATA.netPay)}</div><div class="ksub">Due: 20 Dec 2026</div></div>
+  </div>
+  <div class="grid g2">
+    <div class="card"><h3 class="mb">Output Tax (Sales)</h3>
+      <div class="list-it"><div style="flex:1">Taxable Value</div><div>₹${inr(GST_DATA.sales.taxable)}</div></div>
+      <div class="list-it"><div style="flex:1">CGST (9%)</div><div>₹${inr(GST_DATA.sales.cgst)}</div></div>
+      <div class="list-it"><div style="flex:1">SGST (9%)</div><div>₹${inr(GST_DATA.sales.sgst)}</div></div>
+      <div class="list-it b"><div style="flex:1">Total Output</div><div>₹${inr(GST_DATA.sales.cgst+GST_DATA.sales.sgst)}</div></div>
+    </div>
+    <div class="card"><h3 class="mb">ITC Summary</h3>
+      <div class="list-it"><div style="flex:1">ITC from GSTR-2B</div><div>₹${inr(GST_DATA.itcAvail)}</div></div>
+      <div class="list-it"><div style="flex:1">Output Tax</div><div>₹${inr(GST_DATA.sales.cgst+GST_DATA.sales.sgst)}</div></div>
+      <div class="list-it b" style="color:var(--bad)"><div style="flex:1">Net Payable</div><div>₹${inr(GST_DATA.netPay)}</div></div>
+      <button class="btn pri sm mt" data-act="gstPay">Generate Challan</button>
+    </div>
+  </div>
+  <div class="tip mt">💡 GST 2.0 rate slabs (Sep 2025): 0% / 5% / 18% / 40%. Mobile phones: 18%. Ledgify auto-applies correct rates.</div>`;
+}
+
+function gst2BView(){
+  const r=GST_DATA.r2b;
+  return `<div class="grid g3 mb">
+    <div class="card" style="border-left:4px solid var(--ok)"><div class="klbl">Matched</div><div class="kval" style="color:var(--ok)">${r.matched}</div></div>
+    <div class="card" style="border-left:4px solid var(--warn)"><div class="klbl">Mismatch</div><div class="kval" style="color:var(--warn)">${r.mismatched}</div></div>
+    <div class="card" style="border-left:4px solid var(--bad)"><div class="klbl">Missing in 2B</div><div class="kval" style="color:var(--bad)">${r.missing}</div></div>
+  </div>
+  <div class="card"><div class="tw"><table class="t">
+    <tr><th>Invoice</th><th>Supplier</th><th>Your Books</th><th>GSTR-2B</th><th>Status</th></tr>
+    <tr><td class="mono">SI/2026/1123</td><td>Samsung India</td><td>₹5,25,000</td><td>₹5,25,000</td><td><span class="chip ok">Matched</span></td></tr>
+    <tr><td class="mono">XI/897</td><td>Xiaomi Technology</td><td>₹3,20,000</td><td>₹3,18,500</td><td><span class="chip warn">Value Diff</span></td></tr>
+    <tr><td class="mono">RL/4521</td><td>Reliance Digital</td><td>₹89,000</td><td>Not found</td><td><span class="chip bad">Missing 2B</span></td></tr>
+    <tr><td class="mono">AX/892</td><td>Axis Distribution</td><td>Not in books</td><td>₹43,250</td><td><span class="chip acc">In 2B only</span></td></tr>
+  </table></div>
+  <div class="tip warn mt">⚠️ 2 mismatches need correction before filing GSTR-3B to avoid ITC reversal.</div></div>`;
+}
+
+function gstStatusView(){
+  return `<div class="grid g2">
+    <div class="card"><h3 class="mb">Filing Status — Nov 2026</h3>
+      <div class="list-it"><div style="flex:1"><b>GSTR-1</b><div class="small muted">Sales register — 38 invoices</div></div>
+        <span class="chip acc">Draft</span><button class="btn sm pri" style="margin-left:8px" onclick="toast('Filing GSTR-1 on GST portal...')">File Now</button></div>
+      <div class="list-it"><div style="flex:1"><b>GSTR-3B</b><div class="small muted">Summary return · Due 20 Dec</div></div>
+        <span class="chip grey">Pending GSTR-1</span></div>
+      <div class="list-it"><div style="flex:1"><b>GSTR-2B</b><div class="small muted">Auto-generated by GSTN</div></div>
+        <span class="chip ok">Available</span></div>
+    </div>
+    <div class="card"><h3 class="mb">Annual / Quarterly</h3>
+      <div class="list-it"><div style="flex:1"><b>GSTR-9</b> (Annual)<div class="small muted">FY 2025-26 · Due 31 Dec 2026</div></div><span class="chip warn">In Progress</span></div>
+      <div class="list-it"><div style="flex:1"><b>E-Invoicing</b><div class="small muted">Turnover &gt;₹5Cr mandate</div></div><span class="chip ok">Enabled</span></div>
+    </div></div>`;
+}
+
+R.reports=()=>{
+  const tabs=[['pl','P&L'],['bs','Balance Sheet'],['cf','Cash Flow'],['age','Ageing']];
+  return `<div class="phead"><h2>📊 ${L.reports}</h2><p>Financial reports for FY 2026-27</p></div>
+  <div class="tabs">${tabs.map(([k,v])=>`<button class="tab ${S.repTab===k?'on':''}" data-act="repTab" data-k="${k}">${v}</button>`).join('')}</div>
+  <div class="card">
+    <div class="row mb"><span class="b">April 2026 — November 2026 (8 months)</span><span style="flex:1"></span>
+    <button class="btn sm" data-act="exportCA">📤 Export PDF</button></div>
+    <div class="grid g2"><div>
+      <div class="b mb" style="font-size:15px">Income</div>
+      <div class="list-it"><div style="flex:1">Sales Revenue</div><div>₹${inr(14760000)}</div></div>
+      <div class="list-it"><div style="flex:1">Other Income</div><div>₹${inr(25600)}</div></div>
+      <div class="list-it b" style="border-top:2px solid var(--bdr)"><div style="flex:1">Gross Revenue</div><div>₹${inr(14785600)}</div></div>
+      <div class="b mb mt" style="font-size:15px">Expenses</div>
+      <div class="list-it"><div style="flex:1">Cost of Goods (Purchases)</div><div>₹${inr(12452000)}</div></div>
+      <div class="list-it"><div style="flex:1">Salaries</div><div>₹${inr(680000)}</div></div>
+      <div class="list-it"><div style="flex:1">Rent</div><div>₹${inr(280000)}</div></div>
+      <div class="list-it"><div style="flex:1">Other Expenses</div><div>₹${inr(145600)}</div></div>
+      <div class="list-it b" style="border-top:2px solid var(--bdr)"><div style="flex:1">Total Expenses</div><div>₹${inr(13557600)}</div></div>
+    </div><div>
+      <div class="kcard green"><div class="klbl">Net Profit</div><div class="kval">₹${inr(1228000)}</div><div class="ksub">Margin: 8.3%</div></div>
+      <div class="kcard blue mt"><div class="klbl">Total Revenue</div><div class="kval">₹${inr(14785600)}</div></div>
+      <div class="tip mt ok">↑ 14% growth vs same period last year. Gross margin improved from 15% to 16.5%.</div>
+      <button class="btn pri sm mt" data-act="go" data-id="ca">🤝 Share with CA</button>
+    </div></div>
+  </div>`;
+};
+
+R.ca=()=>`<div class="phead"><h2>🤝 ${L.ca}</h2><p>Share your data securely with ${BIZ.ca}</p></div>
+  <div class="grid g2">
+    <div class="card">
+      <h3 class="mb">Export Package for CA</h3>
+      <p class="muted small mb">Your CA will receive: all invoices, bank statement, GST summary, P&L — in Tally-compatible format.</p>
+      <div class="list-it"><span>🧾</span><div style="flex:1">Sales invoices (Nov 2026)</div><span class="chip ok">38 ready</span></div>
+      <div class="list-it"><span>🏦</span><div style="flex:1">Bank statement (Axis XX4521)</div><span class="chip ok">Categorised ✓</span></div>
+      <div class="list-it"><span>🇮🇳</span><div style="flex:1">GST workings</div><span class="chip warn">2 issues</span></div>
+      <div class="list-it"><span>📊</span><div style="flex:1">P&L (Apr–Nov 2026)</div><span class="chip ok">Ready</span></div>
+      <div class="sep"></div>
+      <button class="btn lg pri" data-act="exportCA">📦 ${L.caExport} (WhatsApp / Email)</button>
+      <div class="tip mt">💡 Package includes Tally XML for direct import — your CA saves 2–3 hours per month.</div>
+    </div>
+    <div class="card">
+      <h3 class="mb">CA Status</h3>
+      <div class="list-it"><div style="flex:1"><b>Last Package Sent</b><div class="small muted">05 Nov 2026 · via WhatsApp</div></div><span class="chip ok">Received</span></div>
+      <div class="list-it"><div style="flex:1"><b>GSTR-1 (Oct)</b><div class="small muted">Filed by CA on 11 Nov 2026</div></div><span class="chip ok">Filed ✓</span></div>
+      <div class="list-it"><div style="flex:1"><b>TDS Return (Q2)</b><div class="small muted">Due 31 Oct 2026</div></div><span class="chip ok">Filed ✓</span></div>
+      <div class="list-it"><div style="flex:1"><b>Nov 2026 Package</b><div class="small muted">Scheduled: 11 Nov 2026</div></div><span class="chip warn">Pending</span></div>
+      <div class="sep"></div>
+      <div class="b small">Your CA</div>
+      <div class="list-it"><span>👩‍💼</span><div>${BIZ.ca}<div class="small muted">${BIZ.caPhone}</div></div>
+      <button class="btn sm" onclick="toast('Opening WhatsApp...')">📱</button></div>
+    </div>
+  </div>`;
+
+R.settings=()=>`<div class="phead"><h2>⚙️ ${L.settings}</h2></div>
+  <div class="grid g2">
+    <div class="card"><h3 class="mb">Business Profile</h3>
+      <div class="fgrp"><label class="lbl">${L.bizName}</label><input class="in" value="${BIZ.name}"></div>
+      <div class="fgrp"><label class="lbl">${L.gstin}</label><input class="in" value="${BIZ.gstin}"></div>
+      <div class="fgrp"><label class="lbl">${L.address}</label><textarea class="in" rows="2">${BIZ.addr}</textarea></div>
+      <button class="btn pri" onclick="toast('✓ Business profile saved')">Save</button>
+    </div>
+    <div class="card"><h3 class="mb">Language / भाषा</h3>
+      ${['Hindi (हिंदी)','English','Marathi (मराठी)','Gujarati (ગુજરાતી)','Tamil (தமிழ்)','Telugu (తెలుగు)','Bengali (বাংলা)','Kannada (ಕನ್ನಡ)','Punjabi (ਪੰਜਾਬੀ)','Malayalam (മലയാളം)'].map((l,i)=>`<label style="display:flex;align-items:center;gap:8px;padding:6px 0;cursor:pointer">
+        <input type="radio" name="lang" ${i<2?'checked':''} ${i>1?'disabled':''}>
+        ${l} ${i>1?'<span class="chip grey" style="font-size:10px">Coming soon</span>':''}
+      </label>`).join('')}
+      <div class="tip mt">More languages coming in v2. <a href="#" onclick="toast('Registering interest...')">Register interest</a></div>
+    </div>
+    <div class="card"><h3 class="mb">CA Details</h3>
+      <div class="fgrp"><label class="lbl">CA Name & Firm</label><input class="in" value="${BIZ.ca}"></div>
+      <div class="fgrp"><label class="lbl">CA Mobile</label><input class="in" value="${BIZ.caPhone}"></div>
+      <button class="btn pri" onclick="toast('✓ CA details saved')">Save</button>
+    </div>
+    <div class="card"><h3 class="mb">Backup & Data</h3>
+      <p class="small muted mb">All data stored locally on your computer. No internet required.</p>
+      <div class="row">
+        <button class="btn" onclick="toast('✓ Backup saved to Desktop/Ledgify_Backup_'+new Date().toISOString().slice(0,10)+'.zip')">💾 Backup Now</button>
+        <button class="btn" onclick="toast('Select backup file to restore...')">📂 Restore</button>
+      </div>
+      <div class="tip ok mt">✓ Ledgify is 100% offline. Your data never leaves your computer.</div>
+    </div>
+  </div>`;
+
+R.purchase=()=>`<div class="phead"><h2>📦 ${L.purchase}</h2></div>
+  <div class="card"><div class="tw"><table class="t">
+    <tr><th>#</th><th>Supplier</th><th>Date</th><th class="r">Amount</th><th>Status</th></tr>
+    <tr><td class="mono">PO-089</td><td>Samsung India</td><td>08 Nov 2026</td><td class="r b">₹5,25,000</td><td><span class="chip ok">Paid</span></td></tr>
+    <tr><td class="mono">PO-088</td><td>Xiaomi Technology</td><td>03 Nov 2026</td><td class="r b">₹3,20,000</td><td><span class="chip ok">Paid</span></td></tr>
+    <tr><td class="mono">PO-087</td><td>Samsung India</td><td>26 Oct 2026</td><td class="r b">₹4,20,000</td><td><span class="chip ok">Paid</span></td></tr>
+  </table></div></div>`;
+
+R.help2=()=>`<div class="phead"><h2>📖 Help & Manual / सहायता</h2></div>
+  <div class="grid g2">
+    <div class="card"><h3 class="mb">Quick Start Guide</h3>
+      ${[['1','Create your first invoice','Go to Sales → New Invoice. Select party, add items, tap Save.'],['2','Analyze bank statement','Go to Bank Analyzer → Upload Statement. AI does the rest.'],['3','Check GST due','Go to GST → Summary. Net payable is shown clearly.'],['4','Send to CA','Go to CA Connect → Export Package. CA gets Tally-ready file.']].map(([n,t,d])=>`<div class="list-it"><span style="background:var(--brand);color:#fff;border-radius:50%;width:24px;height:24px;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;flex-shrink:0">${n}</span><div><div class="b">${t}</div><div class="small muted">${d}</div></div></div>`).join('')}
+    </div>
+    <div class="card"><h3 class="mb">Video Tutorials (Coming Soon)</h3>
+      ${['How to create GST invoice in 30 seconds','How to reconcile bank statement','How to file GSTR-1 with Ledgify','How to send data to your CA'].map(v=>`<div class="list-it"><span>▶️</span><div>${v}</div></div>`).join('')}
+    </div>
+  </div>
+  <div class="card mt"><h3 class="mb">Frequently Asked / अक्सर पूछे जाने वाले सवाल</h3>
+    ${[['क्या Ledgify offline काम करता है?','हाँ — 100% offline। Internet की जरूरत नहीं। आपका सारा data आपके computer पर सुरक्षित है।'],['Does it work without internet?','Yes — completely offline. No subscription. Your data stays on your computer forever.'],['GST 2.0 ke naye rates kya hain?','Sep 2025 se nayi slabs: 0%, 5%, 18%, 40%. Mobile phones: 18%. Ledgify auto-updated hai.'],['Can I import from Tally?','Yes — export your Tally data as XML and import it in Settings → Import.']].map(([q,a])=>`<div style="margin-bottom:14px"><div class="b">${q}</div><div class="small muted" style="margin-top:4px">${a}</div></div>`).join('')}
+  </div>`;
+</script>
+<script>
+// ── ACTIONS ──
+function wa(name,amt){toast(`📱 Opening WhatsApp for ${name} — ₹${inr(amt)}...`)}
+function pickItem(idx,itemId){
+  const it=ITEMS.find(x=>x.id===itemId);
+  if(it){S.newInv.items[idx]={_id:it.id,name:it.name,qty:1,price:it.price,gst:it.gst};}
+  render();
+}
+
+const ACT={
+  go:d=>{S.page=d.id;render()},
+  langToggle:()=>{S.lang=S.lang==='hi'?'en':'hi';applyLang();render()},
+  saleTab:d=>{S.saleTab=d.k;render()},
+  bankTab:d=>{S.bankTab=d.k;render()},
+  gstTab:d=>{S.gstTab=d.k;render()},
+  repTab:d=>{S.repTab=d.k;render()},
+  quickSale:()=>{S.page='sale';S.saleTab='new';S.newInv={party:'',items:[{name:'',qty:1,price:0,gst:18}],notes:''};render()},
+  saveInv:()=>{
+    if(!S.newInv.items[0].price){toast('⚠️ Add at least one item with price');return;}
+    const id='LG-00'+(INV.length+1);
+    const sub=S.newInv.items.reduce((a,b)=>a+(b.qty*b.price),0);
+    const tax=S.newInv.items.reduce((a,b)=>a+(b.qty*b.price*b.gst/100),0);
+    INV.unshift({id,date:'2026-11-10',party:S.newInv.party||'p1',items:S.newInv.items.length,amt:sub,tax:Math.round(tax),total:Math.round(sub+tax),st:'unpaid',due:'2026-11-25'});
+    S.saleTab='list';S.newInv={party:'',items:[{name:'',qty:1,price:0,gst:18}],notes:''};
+    toast('✓ Invoice '+id+' saved! Print/WhatsApp options below.');render();
+  },
+  viewInv:d=>{
+    const inv=INV.find(x=>x.id===d.id);if(!inv)return;
+    modal(inv.id,`<div class="inv-total">
+      <div><b>Party:</b> ${esc(pname(inv.party))}</div>
+      <div><b>Date:</b> ${fds(inv.date)} &nbsp;·&nbsp; <b>Due:</b> ${fds(inv.due)}</div>
+      <div class="sep"></div>
+      <div>Taxable: ₹${inr(inv.amt)}</div><div>GST: ₹${inr(inv.tax)}</div>
+      <div class="bigamt">Total: ₹${inr(inv.total)}</div>
+      <div class="mt"><span class="chip ${inv.st==='paid'?'ok':inv.st==='partial'?'warn':'bad'}">${L[inv.st]||inv.st}</span></div>
+    </div>`,[
+      {t:'Mark Paid',cls:'ok',f:()=>{const i=INV.find(x=>x.id===d.id);if(i)i.st='paid';toast('✓ Marked paid');render()}},
+      {t:'📱 WhatsApp',f:()=>wa(pname(inv.party),inv.total)},
+      {t:'Close'}
+    ]);
+  },
+  addParty:()=>modal('Add New Party',`<div class="fgrp"><label class="lbl">Party Name</label><input class="in" id="pn" placeholder="Sharma Electronics"></div>
+    <div class="frow"><div class="fgrp"><label class="lbl">City</label><input class="in" id="pc" placeholder="Ahmedabad"></div>
+    <div class="fgrp"><label class="lbl">Type</label><select class="in" id="pt"><option value="cust">Customer</option><option value="supp">Supplier</option><option value="both">Both</option></select></div></div>
+    <div class="fgrp"><label class="lbl">GSTIN (optional)</label><input class="in" id="pg" placeholder="24XXXXX..."></div>`,[
+    {t:'Cancel'},{t:'Save',cls:'pri',f:()=>{const n=$('#pn')?.value;if(!n){toast('Enter party name');return;}PARTIES.push({id:'p'+Date.now(),name:n,city:$('#pc')?.value||'',type:$('#pt')?.value||'cust',bal:0,due:null,overdue:false,gstin:$('#pg')?.value||''});toast('✓ Party added');render();}}
+  ]),
+  exportBank:()=>toast('✓ Exporting bank data as Tally XML + CA Package...'),
+  exportTally:()=>toast('✓ Tally XML generated — open Tally and import via Gateway → Import Data'),
+  exportCA:()=>{toast('✓ Preparing CA package (invoices + bank + GST)...');setTimeout(()=>toast('📱 Opening WhatsApp to send to '+BIZ.ca+'...'),1500)},
+  gstPay:()=>toast('Opening GST portal for challan generation...'),
+  fixTxn:()=>modal('Categorise Transaction',`<div class="fgrp"><label class="lbl">Category</label>
+    <select class="in"><option>Customer Receipt (Sale)</option><option>Supplier Payment (Purchase)</option><option>Business Expense</option><option>Tax / GST</option><option>Bank Transfer</option><option>Other</option></select></div>
+    <div class="fgrp"><label class="lbl">Party (optional)</label><select class="in"><option>-- None --</option>${PARTIES.map(p=>`<option>${esc(p.name)}</option>`).join('')}</select></div>`,[
+    {t:'Cancel'},{t:'Save',cls:'pri',f:()=>toast('✓ Transaction categorised')}
+  ]),
+  notif:()=>modal('Notifications 🔔',`<div>
+    <div class="list-it"><span>⚠️</span><div><b>Overdue: Mobile Point</b><div class="small muted">₹2,15,000 — 15 days overdue · Send WhatsApp reminder</div></div></div>
+    <div class="list-it"><span>📦</span><div><b>Low Stock: iPhone 15</b><div class="small muted">Only 3 units left · Min: 5</div></div></div>
+    <div class="list-it"><span>🇮🇳</span><div><b>GSTR-1 Due: 11 Dec 2026</b><div class="small muted">38 invoices ready to file</div></div></div>
+    <div class="list-it"><span>🤝</span><div><b>CA Reminder</b><div class="small muted">Send Nov data to CA Meera Iyer by 12 Nov</div></div></div>
+  </div>`),
+  help:()=>{S.page='help2';render()},
+};
+
+// ── RENDER ──
+function render(){
+  const fn=R[S.page]||R.home;
+  $('#page').innerHTML=fn();
+  // update sidebar active state
+  $$('.navit').forEach(el=>{
+    const id=el.dataset.id;
+    el.classList.toggle('on',id===S.page);
+  });
+  // rebind events
+  $$('[data-act]').forEach(el=>{
+    el.onclick=e=>{
+      e.stopPropagation();
+      const act=el.dataset.act;
+      if(ACT[act])ACT[act]({...el.dataset});
+    };
+  });
+}
+
+// ── INIT ──
+document.addEventListener('DOMContentLoaded',()=>{
+  applyLang();
+  render();
+  // close modal on backdrop click
+  $('#mover').addEventListener('click',e=>{if(e.target===$('#mover'))closeMod()});
+});
+</script>
+</body>
+</html>

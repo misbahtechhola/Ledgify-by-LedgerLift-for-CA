@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ledgify User Manual — English</title>
+<style>
+body{font-family:'Segoe UI',system-ui,sans-serif;max-width:860px;margin:0 auto;padding:40px 24px;line-height:1.7;color:#1C1917}
+h1{color:#0F766E;font-size:32px;margin-bottom:4px}
+.subtitle{color:#57534E;font-size:16px;margin-bottom:40px}
+h2{color:#0F766E;font-size:22px;margin-top:40px;margin-bottom:12px;border-bottom:2px solid #E6F4F3;padding-bottom:8px}
+h3{font-size:17px;margin-top:24px;margin-bottom:8px;color:#1C1917}
+p,li{color:#3D3833;font-size:15px}
+ul,ol{padding-left:24px;margin-bottom:16px}
+li{margin-bottom:6px}
+.tip{background:#FEF3C7;border-left:4px solid #F59E0B;padding:12px 16px;border-radius:0 8px 8px 0;margin:16px 0;font-size:14px}
+.warning{background:#FEE2E2;border-left:4px solid #DC2626;padding:12px 16px;border-radius:0 8px 8px 0;margin:16px 0;font-size:14px}
+.note{background:#DBEAFE;border-left:4px solid #2563EB;padding:12px 16px;border-radius:0 8px 8px 0;margin:16px 0;font-size:14px}
+code{background:#F5F4F2;padding:2px 6px;border-radius:4px;font-family:monospace;font-size:13px}
+.toc{background:#F5F4F2;padding:20px 24px;border-radius:12px;margin-bottom:36px}
+.toc h3{margin-top:0}
+.toc a{color:#0F766E;text-decoration:none;display:block;padding:3px 0;font-size:14px}
+.toc a:hover{text-decoration:underline}
+table{width:100%;border-collapse:collapse;margin:16px 0;font-size:14px}
+th{background:#E6F4F3;padding:10px 12px;text-align:left;font-weight:600}
+td{padding:10px 12px;border-bottom:1px solid #E8E6E1}
+@media print{.tip,.note,.warning{border:1px solid #ccc} body{padding:20px}}
+</style>
+</head>
+<body>
+<h1>📚 Ledgify User Manual</h1>
+<div class="subtitle">Smart Books. Happy Business. — Version 1.0 | Free Offline Accounting for Indian Businesses</div>
+<div class="toc">
+<h3>Table of Contents</h3>
+<a href="#start">1. Getting Started</a>
+<a href="#company">2. Setting Up Your Company</a>
+<a href="#invoice">3. Creating Invoices</a>
+<a href="#inventory">4. Managing Inventory</a>
+<a href="#khata">5. Khata / Customer Ledger</a>
+<a href="#purchase">6. Recording Purchases</a>
+<a href="#gst">7. GST — Filing & Reconciliation</a>
+<a href="#bank">8. Bank Reconciliation</a>
+<a href="#reports">9. Reports</a>
+<a href="#ca">10. CA Connect</a>
+<a href="#backup">11. Backup & Data Safety</a>
+<a href="#shortcuts">12. Keyboard Shortcuts</a>
+<a href="#faq">13. FAQ</a>
+</div>
+
+<h2 id="start">1. Getting Started</h2>
+<p>Ledgify starts with sample data from "Patel Trading Co." so you can explore every feature before entering your own data. When you first open the app, the <strong>Onboarding Wizard</strong> will walk you through entering your company name, GSTIN, and phone number.</p>
+<div class="tip">💡 <strong>Tip:</strong> Click "Settings → Reset to Sample Data" anytime to go back to the demo data for practice.</div>
+<h3>Navigating the App</h3>
+<ul>
+  <li>The <strong>sidebar</strong> on the left has all modules: Dashboard, Invoices, Khata, Inventory, GST, Bank, Reports, CA Connect, Settings</li>
+  <li>Press <code>Ctrl+K</code> (Windows) or <code>Cmd+K</code> (Mac) to open the <strong>Quick Action palette</strong></li>
+  <li>Press <code>Ctrl+N</code> / <code>Cmd+N</code> to create a new invoice instantly</li>
+</ul>
+
+<h2 id="company">2. Setting Up Your Company</h2>
+<p>Go to <strong>Settings → Company</strong> to enter:</p>
+<ul>
+  <li><strong>Company Name</strong> — appears on all invoices</li>
+  <li><strong>GSTIN</strong> — your 15-digit GST registration number</li>
+  <li><strong>State & State Code</strong> — required for CGST/SGST vs IGST calculation</li>
+  <li><strong>Phone & Address</strong> — printed on invoices</li>
+</ul>
+<p>Go to <strong>Settings → Bank</strong> to add your bank details (shown at bottom of invoices for customer payments).</p>
+<div class="warning">⚠️ Set your State Code correctly! If your state code doesn't match your customer's, the system will auto-calculate IGST (interstate). Wrong state code = wrong GST.</div>
+
+<h2 id="invoice">3. Creating Invoices</h2>
+<p>Click <strong>New Invoice</strong> in the sidebar or press <code>Ctrl+N</code>.</p>
+<ol>
+  <li><strong>Select Customer</strong> — choose from your list or click "+ Add New Customer"</li>
+  <li><strong>Add Items</strong> — type item name (auto-suggests from inventory), enter HSN code, quantity, rate, GST %</li>
+  <li><strong>GST auto-calculates</strong> — CGST+SGST for same state, IGST for different state</li>
+  <li>Add <strong>discount</strong> if needed</li>
+  <li>Click <strong>Preview</strong> to check before saving</li>
+  <li>Click <strong>Save Invoice</strong></li>
+</ol>
+<div class="tip">💡 <strong>GST Rates for common items:</strong> Textiles/Fabric = 5%, Readymade garments ≤ ₹1000 = 5%, Readymade garments > ₹1000 = 12%, Electronics = 18%, Luxury goods = 28%</div>
+<h3>Recording Payment</h3>
+<p>Go to <strong>All Invoices</strong>, find the invoice, click <strong>Pay</strong>. Enter amount, payment mode (NEFT/UPI/Cash), and reference number. The invoice status will update automatically.</p>
+<h3>Sending WhatsApp Reminder</h3>
+<p>In All Invoices, click the 📱 button next to any unpaid invoice. It will open WhatsApp with a pre-written payment reminder message.</p>
+
+<h2 id="inventory">4. Managing Inventory</h2>
+<p>Go to <strong>Inventory</strong> in the sidebar.</p>
+<ul>
+  <li>Click <strong>+ Add Item</strong> to add a new product</li>
+  <li>Set <strong>Reorder Level</strong> — you'll get an alert when stock falls to this level</li>
+  <li>Use <strong>±Stock</strong> button to adjust stock for purchases, wastage, or corrections</li>
+  <li>Stock automatically reduces when you add items to invoices</li>
+  <li>Stock automatically increases when you record a purchase</li>
+</ul>
+<div class="tip">💡 Always enter the HSN code for each item. This is required for GSTR-1 filing.</div>
+
+<h2 id="khata">5. Khata / Customer Ledger</h2>
+<p>Go to <strong>Khata / Clients</strong> to see all customers with their outstanding balances.</p>
+<ul>
+  <li>Click <strong>View</strong> on any customer to see their full invoice history and statement</li>
+  <li>The 📱 button sends a WhatsApp payment reminder</li>
+  <li>Mark customers as <strong>MSME</strong> if they are MSME-registered — Ledgify will alert you if payment crosses 45 days (Section 43B(h) compliance)</li>
+</ul>
+<div class="warning">⚠️ <strong>MSME 43B(h) Alert:</strong> If you owe money to MSME suppliers and don't pay within 45 days (or your agreed terms, max 60 days), that expense may not be allowed as a tax deduction. Ledgify tracks this automatically and alerts you.</div>
+
+<h2 id="purchase">6. Recording Purchases</h2>
+<p>Go to <strong>Purchase</strong> → click <strong>+ New Purchase</strong>.</p>
+<ol>
+  <li>Select the supplier</li>
+  <li>Enter supplier's invoice number</li>
+  <li>Select item and quantity</li>
+  <li>Click Save — stock will be updated automatically</li>
+</ol>
+<p>Purchase records are used for ITC (Input Tax Credit) calculation in GSTR-3B.</p>
+
+<h2 id="gst">7. GST — Filing & Reconciliation</h2>
+<p>Go to <strong>GST</strong> in the sidebar.</p>
+<h3>GSTR-1 (Outward Supplies — due 11th)</h3>
+<p>All your sales invoices for the month. Click <strong>Export JSON</strong> to download in GST portal format and upload directly.</p>
+<h3>GSTR-3B (Net Tax — due 20th)</h3>
+<p>Shows your output tax, ITC, and net payable. Use this to fill GSTR-3B on the GST portal.</p>
+<h3>GSTR-2B Reconciliation</h3>
+<p>Download your 2B from the GST portal, upload here, and Ledgify will show which purchases are matched and which are not. Unmatched ITC may be blocked.</p>
+<div class="tip">💡 File GSTR-1 by 11th, GSTR-3B by 20th of the following month to avoid late fees (₹50/day, min ₹1,000).</div>
+
+<h2 id="bank">8. Bank Reconciliation</h2>
+<p>Go to <strong>Bank</strong>. Import your bank statement CSV (download from your bank's net banking). Ledgify will show each transaction and let you match it to invoices or expenses.</p>
+<div class="tip">💡 Most banks allow you to download statements as CSV from net banking under "Statements" or "Account Summary".</div>
+
+<h2 id="reports">9. Reports</h2>
+<ul>
+  <li><strong>P&L (Profit & Loss)</strong> — Revenue, COGS, Expenses, Net Profit. Download PDF or CSV.</li>
+  <li><strong>Balance Sheet</strong> — Assets vs Liabilities (indicative)</li>
+  <li><strong>Stock Report</strong> — All inventory values, download CSV</li>
+  <li><strong>Customer Statement</strong> — Select any customer and see their complete account statement</li>
+</ul>
+
+<h2 id="ca">10. CA Connect</h2>
+<p>Go to <strong>CA Connect</strong> → <strong>Export CA Package</strong>. This creates a single JSON file containing all your invoices, purchases, expenses, GST data, and summaries. Send this to your CA for GST filing, audit, or ITR.</p>
+
+<h2 id="backup">11. Backup & Data Safety</h2>
+<p>Your data is stored only on your computer. <strong>Take regular backups!</strong></p>
+<ul>
+  <li>Go to <strong>Settings → Backup & Data → Backup Now</strong></li>
+  <li>Save the backup file to Dropbox, Google Drive, or a USB drive</li>
+  <li>To restore: <strong>Settings → Restore from Backup</strong>, select your backup file</li>
+</ul>
+<div class="warning">⚠️ If your computer crashes or is stolen without a backup, your data cannot be recovered. Back up at least once a week.</div>
+
+<h2 id="shortcuts">12. Keyboard Shortcuts</h2>
+<table>
+<thead><tr><th>Shortcut</th><th>Action</th></tr></thead>
+<tbody>
+<tr><td><code>Ctrl+K</code> / <code>Cmd+K</code></td><td>Open Quick Action palette</td></tr>
+<tr><td><code>Ctrl+N</code> / <code>Cmd+N</code></td><td>New Invoice</td></tr>
+<tr><td><code>Escape</code></td><td>Close modal or palette</td></tr>
+</tbody>
+</table>
+
+<h2 id="faq">13. Frequently Asked Questions</h2>
+<h3>Can I use Ledgify without the internet?</h3>
+<p>Yes! Ledgify is 100% offline. It never needs internet to work. All data stays on your computer.</p>
+<h3>How do I move Ledgify to a new computer?</h3>
+<p>1. Take a backup on the old computer (Settings → Backup). 2. Install Ledgify on the new computer. 3. Restore from the backup file.</p>
+<h3>Can my CA directly access Ledgify?</h3>
+<p>Your CA can receive the CA Export file from CA Connect. Direct access portal is coming in Ledgify Pro.</p>
+<h3>Is Ledgify suitable for manufacturing businesses?</h3>
+<p>Yes. Use Inventory for raw materials, record purchases from suppliers, create invoices for finished goods. Full BOM (Bill of Materials) for manufacturers is coming in a future update.</p>
+<h3>How do I delete sample data and start fresh?</h3>
+<p>Go to Settings → Backup & Data → "Clear All Data". Warning: this permanently deletes all data. Take a backup first if you want to keep any entries.</p>
+
+<div style="margin-top:60px;padding:24px;background:#F5F4F2;border-radius:12px;text-align:center">
+<strong>Ledgify by LedgerLift</strong> · Smart Books. Happy Business. · Free Forever<br>
+<span style="font-size:13px;color:#78716C">Need help? All features have ? help tooltips. Hover any ? icon for guidance.</span>
+</div>
+</body>
+</html>

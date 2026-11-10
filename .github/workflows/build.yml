@@ -1,0 +1,103 @@
+name: Build Ledgify Installers
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:   # lets you trigger manually from GitHub website
+
+jobs:
+  # ── macOS universal .dmg (Intel + Apple Silicon in one file) ──────────────
+  build-mac:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build macOS Universal DMG
+        run: npm run build:mac-universal
+        env:
+          CSC_IDENTITY_AUTO_DISCOVERY: false   # skip code signing (no Apple cert needed)
+
+      - name: Upload macOS DMG
+        uses: actions/upload-artifact@v4
+        with:
+          name: Ledgify-macOS
+          path: dist/*.dmg
+          retention-days: 30
+
+  # ── Windows .exe installer ────────────────────────────────────────────────
+  build-windows:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build Windows Installer
+        run: npm run build:win
+        env:
+          CSC_IDENTITY_AUTO_DISCOVERY: false
+
+      - name: Upload Windows EXE
+        uses: actions/upload-artifact@v4
+        with:
+          name: Ledgify-Windows
+          path: dist/*.exe
+          retention-days: 30
+
+  # ── Create GitHub Release with both installers ────────────────────────────
+  release:
+    needs: [build-mac, build-windows]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Download macOS artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: Ledgify-macOS
+          path: ./release
+
+      - name: Download Windows artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: Ledgify-Windows
+          path: ./release
+
+      - name: Create Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: v1.0.${{ github.run_number }}
+          name: "Ledgify v1.0.${{ github.run_number }}"
+          body: |
+            ## Ledgify — Smart Books. Happy Business.
+
+            ### Download
+            | Platform | File |
+            |----------|------|
+            | macOS (Intel + Apple Silicon) | `Ledgify-*.dmg` |
+            | Windows 10/11 | `Ledgify-Setup-*.exe` |
+
+            ### Install
+            - **macOS:** Open `.dmg` → drag Ledgify to Applications
+            - **Windows:** Run `.exe` → click Install
+
+            > 100% offline · No internet needed · Your data stays on your computer
+          files: ./release/*
+          draft: false
+          prerelease: false
