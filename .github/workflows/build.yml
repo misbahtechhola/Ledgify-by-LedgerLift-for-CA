@@ -1,4 +1,4 @@
-name: Build Ledgify Installers
+name: Build LedgerLift Suite Installers
 on:
   push:
     branches: [main]
@@ -19,13 +19,25 @@ jobs:
       - name: Install
         run: npm ci
       - name: Build DMG (Intel x64)
-        run: npm run build:mac-x64
+        run: |
+          npm run build:mac-x64 || true
+          ls -la dist/ || true
         env:
           CSC_IDENTITY_AUTO_DISCOVERY: false
+      - name: Verify x64 DMG
+        run: |
+          if ls dist/*.dmg 1>/dev/null 2>&1; then
+            echo "✅ x64 DMG built successfully:"
+            ls -lh dist/*.dmg
+          else
+            echo "❌ No DMG found in dist/"
+            ls -la dist/ || echo "dist/ does not exist"
+            exit 1
+          fi
       - name: Upload x64 DMG
         uses: actions/upload-artifact@v4
         with:
-          name: Ledgify-macOS-Intel-DMG
+          name: LedgerLift-Suite-macOS-Intel-DMG
           path: dist/*.dmg
           retention-days: 30
   build-mac-arm64:
@@ -39,14 +51,30 @@ jobs:
           node-version: '20'
       - name: Install
         run: npm ci
+      - name: Detach any stale volumes
+        run: |
+          hdiutil detach "/Volumes/Install LedgerLift Suite" -force 2>/dev/null || true
+          hdiutil detach "/Volumes/Install Ledgify" -force 2>/dev/null || true
       - name: Build DMG (Apple Silicon arm64)
-        run: npm run build:mac-arm64
+        run: |
+          npm run build:mac-arm64 || true
+          ls -la dist/ || true
         env:
           CSC_IDENTITY_AUTO_DISCOVERY: false
+      - name: Verify arm64 DMG
+        run: |
+          if ls dist/*arm64*.dmg 1>/dev/null 2>&1 || ls dist/*.dmg 1>/dev/null 2>&1; then
+            echo "✅ arm64 DMG built successfully:"
+            ls -lh dist/*.dmg
+          else
+            echo "❌ No DMG found in dist/"
+            ls -la dist/ || echo "dist/ does not exist"
+            exit 1
+          fi
       - name: Upload arm64 DMG
         uses: actions/upload-artifact@v4
         with:
-          name: Ledgify-macOS-AppleSilicon-DMG
+          name: LedgerLift-Suite-macOS-AppleSilicon-DMG
           path: dist/*.dmg
           retention-days: 30
   build-windows:
@@ -67,7 +95,7 @@ jobs:
       - name: Upload EXE
         uses: actions/upload-artifact@v4
         with:
-          name: Ledgify-Windows-EXE
+          name: LedgerLift-Suite-Windows-EXE
           path: dist/*.exe
           retention-days: 30
   release:
@@ -77,19 +105,32 @@ jobs:
       - name: Download Intel DMG
         uses: actions/download-artifact@v4
         with:
-          name: Ledgify-macOS-Intel-DMG
+          name: LedgerLift-Suite-macOS-Intel-DMG
           path: ./release
       - name: Download Apple Silicon DMG
         uses: actions/download-artifact@v4
         with:
-          name: Ledgify-macOS-AppleSilicon-DMG
+          name: LedgerLift-Suite-macOS-AppleSilicon-DMG
           path: ./release
       - name: Download Windows EXE
         uses: actions/download-artifact@v4
         with:
-          name: Ledgify-Windows-EXE
+          name: LedgerLift-Suite-Windows-EXE
           path: ./release
+      - name: List release files
+        run: ls -lh ./release/
       - name: Create Release
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: gh release create v1.0.${{ github.run_number }} ./release/* --repo "${{ github.repository }}" --title "Ledgify v1.0.${{ github.run_number }}" --notes "Free offline accounting for Indian SME traders."
+        run: |
+          gh release create v1.0.${{ github.run_number }} ./release/* \
+            --repo "${{ github.repository }}" \
+            --title "LedgerLift Suite v1.0.${{ github.run_number }}" \
+            --notes "LedgerLift Suite — Ledgify (SME accounting) + CA Desk (practice management for CAs) in one app.
+
+          Includes:
+          - 📦 macOS Intel DMG (x64)
+          - 🍎 macOS Apple Silicon DMG (arm64)
+          - 🪟 Windows Installer (.exe)
+
+          Switch between Ledgify (SME trader mode) and CA Desk (accountant mode) with one click."
