@@ -9,104 +9,73 @@ permissions:
   contents: write
 
 jobs:
-  # ── macOS universal .dmg (Intel + Apple Silicon) ──────────────────────────
   build-mac:
     runs-on: macos-latest
     steps:
       - uses: actions/checkout@v4
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
+      - uses: actions/setup-node@v4
         with:
           node-version: '20'
           cache: 'npm'
 
-      - name: Install dependencies
-        run: npm ci
+      - run: npm ci
 
-      - name: Build macOS Universal DMG
+      - name: Build macOS DMG
         run: npm run build:mac-universal
         env:
           CSC_IDENTITY_AUTO_DISCOVERY: false
 
-      - name: Upload macOS DMG
-        uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v4
         with:
           name: Ledgify-macOS-DMG
           path: dist/*.dmg
           retention-days: 30
 
-  # ── Windows NSIS .exe installer ───────────────────────────────────────────
   build-windows:
     runs-on: windows-latest
     steps:
       - uses: actions/checkout@v4
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
+      - uses: actions/setup-node@v4
         with:
           node-version: '20'
           cache: 'npm'
 
-      - name: Install dependencies
-        run: npm ci
+      - run: npm ci
 
-      - name: Build Windows Installer
+      - name: Build Windows EXE
         run: npm run build:win
         env:
           CSC_IDENTITY_AUTO_DISCOVERY: false
 
-      - name: Upload Windows EXE
-        uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v4
         with:
           name: Ledgify-Windows-EXE
           path: dist/*.exe
           retention-days: 30
 
-  # ── Publish GitHub Release with both installers ───────────────────────────
   release:
     needs: [build-mac, build-windows]
     runs-on: ubuntu-latest
     steps:
-      - name: Download macOS artifact
-        uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@v4
         with:
           name: Ledgify-macOS-DMG
           path: ./release
 
-      - name: Download Windows artifact
-        uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@v4
         with:
           name: Ledgify-Windows-EXE
           path: ./release
 
-      - name: List release files
-        run: ls -lh ./release/
-
-      - name: Create GitHub Release
-        uses: softprops/action-gh-release@v2
-        with:
-          tag_name: v1.0.${{ github.run_number }}
-          name: "Ledgify v1.0.${{ github.run_number }} — Smart Books. Happy Business."
-          body: |
-            ## Ledgify by LedgerLift
-
-            Free offline accounting app for Indian SME/MSME traders.
-
-            ### Download Your Installer
-
-            | Platform | File | Notes |
-            |----------|------|-------|
-            | 🍎 macOS (Intel + M1/M2/M3/M4) | `Ledgify-*.dmg` | Right-click → Open first time |
-            | 🪟 Windows 10/11 | `Ledgify-Setup-*.exe` | Click Install → Done |
-
-            ### Features
-            - GST invoicing (CGST/SGST/IGST auto-calc)
-            - Khata (customer ledger)
-            - Inventory management
-            - TDS tracking
-            - 13 Indian languages
-            - 100% offline · Your data stays on your computer
-          files: ./release/*
-          draft: false
-          prerelease: false
+      - name: Publish Release
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          TAG="v1.0.${{ github.run_number }}"
+          NOTES="Ledgify by LedgerLift. Free offline accounting for Indian SME traders. macOS dmg + Windows exe. 100% offline, GST-ready, 13 Indian languages."
+          gh release create "$TAG" ./release/* \
+            --repo "${{ github.repository }}" \
+            --title "Ledgify $TAG" \
+            --notes "$NOTES"
