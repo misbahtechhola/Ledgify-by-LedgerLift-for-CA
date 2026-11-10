@@ -1,7 +1,7 @@
 {
   "name": "ledgify",
   "version": "1.0.0",
-  "description": "Ledgify by LedgerLift \u2014 Smart Books. Happy Business.",
+  "description": "Ledgify by LedgerLift — Smart Books. Happy Business.",
   "main": "main.js",
   "author": "LedgerLift",
   "license": "MIT",
@@ -12,10 +12,9 @@
     "build:mac": "electron-builder --mac",
     "build:mac-arm": "electron-builder --mac --arm64",
     "build:mac-x64": "electron-builder --mac --x64",
-    "build:mac-universal": "electron-builder --mac --universal",
+    "build:mac-universal": "electron-builder --mac --x64 --arm64",
     "build:win": "electron-builder --win",
-    "build:linux": "electron-builder --linux",
-    "postinstall": "electron-builder install-app-deps"
+    "build:linux": "electron-builder --linux"
   },
   "dependencies": {
     "electron-store": "^8.1.0"
@@ -27,7 +26,7 @@
   "build": {
     "appId": "com.ledgerlift.ledgify",
     "productName": "Ledgify",
-    "copyright": "Copyright \u00a9 2026 LedgerLift",
+    "copyright": "Copyright © 2026 LedgerLift",
     "directories": {
       "buildResources": "src/assets",
       "output": "dist"
@@ -41,26 +40,19 @@
       "target": [
         {
           "target": "dmg",
-          "arch": [
-            "universal"
-          ]
+          "arch": ["x64", "arm64"]
         }
       ],
       "hardenedRuntime": false,
-      "gatekeeperAssess": false,
-      "identity": null
+      "gatekeeperAssess": false
     },
     "win": {
       "target": [
         {
           "target": "nsis",
-          "arch": [
-            "x64"
-          ]
+          "arch": ["x64"]
         }
-      ],
-      "certificateFile": null,
-      "sign": null
+      ]
     },
     "linux": {
       "target": "AppImage"
