@@ -21,24 +21,29 @@ jobs:
       - name: Build DMG (Intel x64)
         run: |
           npm run build:mac-x64 || true
-          ls -la dist/ || true
         env:
           CSC_IDENTITY_AUTO_DISCOVERY: false
-      - name: Verify x64 DMG
+      - name: Verify and rename x64 DMG
         run: |
-          if ls dist/*.dmg 1>/dev/null 2>&1; then
-            echo "✅ x64 DMG built successfully:"
-            ls -lh dist/*.dmg
-          else
-            echo "❌ No DMG found in dist/"
-            ls -la dist/ || echo "dist/ does not exist"
+          ls -la dist/
+          DMG=$(ls dist/*.dmg 2>/dev/null | head -1)
+          if [ -z "$DMG" ]; then
+            echo "❌ No DMG found!"
             exit 1
           fi
+          echo "✅ Found DMG: $DMG"
+          # Ensure filename has -x64 suffix
+          NEWNAME=$(echo "$DMG" | sed 's/-x64\.dmg/.dmg/' | sed 's/\.dmg$/-x64.dmg/')
+          if [ "$DMG" != "$NEWNAME" ]; then
+            mv "$DMG" "$NEWNAME"
+            echo "Renamed to: $NEWNAME"
+          fi
+          ls -lh dist/*.dmg
       - name: Upload x64 DMG
         uses: actions/upload-artifact@v4
         with:
           name: LedgerLift-Suite-macOS-Intel-DMG
-          path: dist/*.dmg
+          path: dist/*-x64.dmg
           retention-days: 30
   build-mac-arm64:
     runs-on: macos-latest
@@ -58,24 +63,29 @@ jobs:
       - name: Build DMG (Apple Silicon arm64)
         run: |
           npm run build:mac-arm64 || true
-          ls -la dist/ || true
         env:
           CSC_IDENTITY_AUTO_DISCOVERY: false
-      - name: Verify arm64 DMG
+      - name: Verify and rename arm64 DMG
         run: |
-          if ls dist/*arm64*.dmg 1>/dev/null 2>&1 || ls dist/*.dmg 1>/dev/null 2>&1; then
-            echo "✅ arm64 DMG built successfully:"
-            ls -lh dist/*.dmg
-          else
-            echo "❌ No DMG found in dist/"
-            ls -la dist/ || echo "dist/ does not exist"
+          ls -la dist/
+          DMG=$(ls dist/*.dmg 2>/dev/null | head -1)
+          if [ -z "$DMG" ]; then
+            echo "❌ No DMG found!"
             exit 1
           fi
+          echo "✅ Found DMG: $DMG"
+          # Ensure filename has -arm64 suffix
+          NEWNAME=$(echo "$DMG" | sed 's/-arm64\.dmg/.dmg/' | sed 's/\.dmg$/-arm64.dmg/')
+          if [ "$DMG" != "$NEWNAME" ]; then
+            mv "$DMG" "$NEWNAME"
+            echo "Renamed to: $NEWNAME"
+          fi
+          ls -lh dist/*.dmg
       - name: Upload arm64 DMG
         uses: actions/upload-artifact@v4
         with:
           name: LedgerLift-Suite-macOS-AppleSilicon-DMG
-          path: dist/*.dmg
+          path: dist/*-arm64.dmg
           retention-days: 30
   build-windows:
     runs-on: windows-latest
@@ -129,8 +139,8 @@ jobs:
             --notes "LedgerLift Suite — Ledgify (SME accounting) + CA Desk (practice management for CAs) in one app.
 
           Includes:
-          - 📦 macOS Intel DMG (x64)
-          - 🍎 macOS Apple Silicon DMG (arm64)
-          - 🪟 Windows Installer (.exe)
+          - 📦 macOS Intel DMG (*-x64.dmg) — for older Intel Macs
+          - 🍎 macOS Apple Silicon DMG (*-arm64.dmg) — for M1/M2/M3 Macs
+          - 🪟 Windows Installer (.exe) — NSIS one-click installer
 
-          Switch between Ledgify (SME trader mode) and CA Desk (accountant mode) with one click."
+          Switch between Ledgify (SME trader mode) and CA Desk (accountant mode) with one click inside the app."
